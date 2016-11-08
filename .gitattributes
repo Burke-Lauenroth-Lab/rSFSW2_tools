@@ -1,0 +1,2 @@
+Test_projects/0_ReferenceOutput/*.sqlite3 filter=lfs diff=lfs merge=lfs -text
+Test_projects/0_ReferenceOutput/*.sqlite filter=lfs diff=lfs merge=lfs -text
