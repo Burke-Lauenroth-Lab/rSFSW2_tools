@@ -67,11 +67,11 @@ url.Rrepos <- "https://cran.us.r-project.org"
 #	if !interactive: current working directory must be folder of test projects,
 #		e.g., SoilWat_R_Wrapper/tests/Test_projects/Test4_AllOverallAggregations
 if(interactive()) {
-	dir.prj <- normalizePath(file.path(".", "tests", "Test_projects", "Test1_downscaling_overhaul"))
+	dir.prj <- normalizePath(file.path(".", "Test_projects", "Test1_downscaling_overhaul"))
 	setwd(dir.prj)
 }
 dir.prj <- dir.big <- getwd()
-dir.code <- normalizePath(file.path("..", "..", "..")) # "github/SoilWat_R_Wrapper/R"
+dir.code <- normalizePath(file.path("..", "..", "..", "SoilWat_R_Wrapper")) # "github/SoilWat_R_Wrapper/"
 
 #parent folder containing external data
 #drs dir.external <- "/Volumes/YOURBIGDATA/BigData/GIS/Data"

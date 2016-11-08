@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-print(paste0(Sys.time(), ": running SWSF test projects"))
+print(paste0(Sys.time(), ": running 'rSWSFtools' test projects"))
 dir.old <- getwd()
 
 
@@ -10,6 +10,7 @@ if (!interactive()) {
   if (any("--help" == script_args)) {
     print("Options:")
     print("    '--path' or '-p': -p=path to folder of test projects 'Test_projects'")
+    print("    '--path_swsf' or '-s': -s=path to folder of 'SoilWat_R_Wrapper'")
     print("    '--new_ref' or '-r': add output DB as new reference if successful")
     print("    '--force-delete' or '-D': force delete test output; implies '-d'")
     print("    '--delete' or '-d': delete test output if successful")
@@ -21,6 +22,9 @@ if (!interactive()) {
 
   temp <- grepl("--path", script_args) | grepl("-p", script_args)
   path <- if (any(temp)) strsplit(script_args[temp][1], "=")[[1]][2] else dir.old
+
+  temp <- grepl("--path_swsf", script_args) | grepl("-s", script_args)
+  path_code <- if (any(temp)) strsplit(script_args[temp][1], "=")[[1]][2] else dir.old
 
   make_new_ref <- any("--new_ref" == script_args) || any("-r" == script_args)
 
@@ -36,16 +40,16 @@ if (!interactive()) {
     }
 
 } else {
-  path <- make_new_ref <- force_delete_output <- delete_output <- which_tests_torun <- NA
+  path <- path_code <- make_new_ref <- force_delete_output <- delete_output <- which_tests_torun <- NA
 }
 
 
 #---Interactive user input
-# Current working directory must be a subfolder of 'SoilWat_R_Wrapper' or itself
-dir.test <- if (grepl("SoilWat_R_Wrapper", dir.old)) {
+# Current working directory must be a subfolder of 'rSWSFtools' or itself
+dir.test <- if (grepl("rSWSFtools", dir.old)) {
     temp <- strsplit(dir.old, .Platform$file.sep, fixed = TRUE)[[1]]
-    temp <- do.call("file.path", as.list(temp[seq_len(which(temp == "SoilWat_R_Wrapper"))]))
-    file.path(temp, "tests", "Test_projects")
+    temp <- do.call("file.path", as.list(temp[seq_len(which(temp == "rSWSFtools"))]))
+    file.path(temp, "Test_projects")
 
   } else {
     temp <- if (interactive()) {
@@ -90,6 +94,8 @@ delete_output <- if (!force_delete_output) {
 temp <- list.dirs(dir.test, full.names = FALSE, recursive = FALSE)
 tests <- file.path(dir.test, grep("[Test][[:digit:]+][_]", basename(temp), value = TRUE))
 temp <- if (interactive()) {
+    writeLines(paste0("Available tests:\n",
+      paste0("    ", seq_along(tests), ") ", basename(tests), collapse = "\n")))
     readline(paste("Which of the",
                     length(tests),
                     "tests should be run",
@@ -112,6 +118,20 @@ which_tests_torun <- if (!is.na(temp)) {
     seq_along(tests)
   }
 
+# Code of SWSF
+dir.code <- file.path(dir.test, "..", "..", "SoilWat_R_Wrapper")
+if (!dir.exists(dir.code)) {
+  dir.code <- if (interactive()) {
+    readline("Enter path to folder of 'SoilWat_R_Wrapper': ")
+  } else path_code
+
+  if ("SoilWat_R_Wrapper" != basename(dir.code)) {
+    stop("Folder of 'SoilWat_R_Wrapper' could not be located.")
+  }
+}
+
+dir.code <- normalizePath(dir.code)
+
 
 #---Load functions
 source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
@@ -119,8 +139,8 @@ source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE
 
 #---Run projects
 if (any(which_tests_torun > 0)) {
-  out <- run_test_projects(dir.test, tests, dir.old, which_tests_torun,
-    delete_output, force_delete_output, make_new_ref)
+  out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
+    dir_swsf = dir.code, which_tests_torun, delete_output, force_delete_output, make_new_ref)
   print(out)
 
 } else if (which_tests_torun < 1) {

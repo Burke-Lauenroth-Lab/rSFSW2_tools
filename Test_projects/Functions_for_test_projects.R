@@ -3,6 +3,8 @@
 #' @param dir_test A character string. Path to overall test project folder.
 #' @param dir_tests A vector of character strings. Paths to individual test projects.
 #' @param dir_prev A character string. Paths to directory that should be set when function returns.
+#' @param dir_swsf A character string. Path to directory that is a clone of the
+#'  SoilWat_R_Wrapper repository.
 #' @param which_tests_torun An integer vector. Indices of \code{dir_tests} which will be
 #'  carried out.
 #' @param delete_output A logical value. If \code{TRUE} then output will be deleted unless
@@ -16,7 +18,7 @@
 #'  The columns return four logical values \code{has_run}, \code{has_problems},
 #'  \code{made_new_refs}, \code{deleted_output}, and one character string \code{referenceDB}
 #'  of the reference database name against which this run of the test project was compared.
-run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
+run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = NULL,
                               which_tests_torun = seq_along(dir_tests),
                               delete_output = FALSE,
                               force_delete_output = FALSE,
@@ -44,7 +46,7 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
       problems2 <- list()
 
       if (length(test_code) == 1L) {
-        setwd(if (interactive()) file.path(dir_test, "..", "..") else dir_tests[it])
+        setwd(if (interactive()) file.path(dir_test, "..") else dir_tests[it])
         temp <- try(source(file.path(dir_tests[it], test_code), verbose = FALSE, chdir = FALSE))
 
         if (!inherits(temp, "try-error")) {
@@ -123,7 +125,7 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
 #' @return A logical value. \code{TRUE} if successful.
 make_test_output_reference <- function(dir_test, dir_ref = NULL, SWSF_version = NULL) {
   if (is.null(SWSF_version)) {
-    temp <- readLines(file.path(dir_test, "..", "..", "..", "DESCRIPTION"))
+    temp <- readLines(file.path(dir_test, "..", "..", "DESCRIPTION"))
     v <- grep("Version: ", temp, value = TRUE)
     if (length(v) > 0) {
       v <- strsplit(v[1], "Version: ", fixed = TRUE)[[1]][2]
