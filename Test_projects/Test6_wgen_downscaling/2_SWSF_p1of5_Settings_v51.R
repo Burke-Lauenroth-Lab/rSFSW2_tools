@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #--------------------------------------------------------------------------------------------------#
 
 #------------------------FRAMEWORK FOR SOILWAT SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING SIMULATIONS, AND AGGREGATING OUTPUTS
@@ -41,7 +43,7 @@ debug.warn.level <- sum(c(print.debug, interactive()))
 debug.dump.objects <- interactive()
 
 #------Mode of framework
-minVersionRsoilwat <- "1.1.0"
+minVersionRsoilwat <- "1.1.4"
 minVersion_dbWeather <- "3.1.0"
 use_rcpp <- TRUE
 num_cores <- 4
@@ -126,7 +128,7 @@ checkCompleteness <- FALSE
 # check linked BLAS library before simulation runs
 check.blas <- FALSE
 
-#---Load functions
+#---Load functions (don't forget the C functions!)
 rSWSF <- file.path(dir.code, "R", "2_SWSF_p5of5_Functions_v51.RData")
 if (!file.exists(rSWSF) || !continueAfterAbort) {
   sys.source(sub(".RData", ".R", rSWSF), envir = attach(NULL, name = "swsf_funs"))
@@ -259,7 +261,7 @@ rownames(future_yrs) <- make.names(paste0("d", future_yrs[, "delta"], "yrs"), un
 #------Meta-information of input data
 datafile.windspeedAtHeightAboveGround <- 2 #SoilWat requires 2 m, but some datasets are at 10 m, e.g., NCEP/CRSF: this value checks windspeed height and if necessary converts to u2
 adjust.soilDepth <- FALSE # [FALSE] fill soil layer structure from shallower layer(s) or [TRUE] adjust soil depth if there is no soil texture information for the lowest layers
-requested_soil_layers <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 100, 150)
+requested_soil_layers <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150)
 increment_soiltemperature_deltaX_cm <- 5	# If SOILWAT soil temperature is simulated and the solution instable, then the soil profile layer width is increased by this value until a stable solution can be found or total failure is determined
 
 #Climate conditions
@@ -333,8 +335,6 @@ accountNSHemispheres_veg <- TRUE 	#if TRUE and latitude < 0 (i.e., southern hemi
 Index_RunInformation <- NULL #indices of columns of 'SWRunInformation', e.g, c(3, 7:9), or NULL, used for outputting SoilWat-run information in addition to create_treatments and climate scenario
 
 #------Select aggregated output: time scale and variable groups
-#simulation_timescales is at least one of c("daily", "weekly", "monthly", "yearly")
-simulation_timescales <- c("daily", "monthly", "yearly")
 #turn aggregation for variable groups on (1) or off (0), don't delete any variable group labels
 output_aggregates <- c(
 					#---Aggregation: SoilWat inputs
@@ -378,6 +378,7 @@ output_aggregates <- c(
 						"dailySWPextremes", 1,
 						"dailyRechargeExtremes", 1,
 					#---Aggregation: Ecological dryness
+						"dailyNRCS_SoilMoistureTemperatureRegimes_Intermediates", 0, #Requires at least soil layers at 10, 20, 30, 50, 60, 90 cm
 						"dailyNRCS_SoilMoistureTemperatureRegimes", 0, #Requires at least soil layers at 10, 20, 30, 50, 60, 90 cm
 						"dailyNRCS_Chambers2014_ResilienceResistance", 0, #Requires "dailyNRCS_SoilMoistureTemperatureRegimes"
 					  "dailyNRCS_Maestas2016_ResilienceResistance", 0,
@@ -466,6 +467,21 @@ shrub.fraction.limit <- 0.2 	#page 1213: 0.2 in Paruelo JM, Lauenroth WK (1996) 
 growing.season.threshold.tempC <- 10 # based on Trewartha's D temperateness definition (with >=4 & < 8 months with > 10C)
 growing.season.threshold.tempC <- 4 # based on standard input of mean monthly biomass values for vegetation composition
 
+# NRCS soil moisture regimes (SMR) and soil temperature regimes (STR) settings
+opt_NRCS_SMTRs <- list(
+  # Approach for regime determination
+  #   - TRUE: first, determine regime for each year; second, aggregate regimes
+  #   - FALSE: first, average moisture and temperature for each DOY;
+  #            second, determine regime for this average year
+  do_1st_regime = TRUE,
+  # Required regime aggregation agreement level (e.g., 0.5 = majority; 1 = all)
+  crit_agree_frac = 1,
+  # Restrict data to normal years (as defined by SSS 2014) if TRUE; if FALSE, use all years
+  use_normal = TRUE,
+  SWP_dry = -1.5,       #dry means SWP below -1.5 MPa (Soil Survey Staff 2014: p.29)
+  SWP_sat = -0.033,     #saturated means SWP above -0.033 MPa
+  impermeability = 0.9  #impermeable layer
+)
 
 #------SoilWat files
 sw <- "sw_v31"
