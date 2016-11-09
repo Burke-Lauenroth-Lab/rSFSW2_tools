@@ -98,8 +98,8 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
     }
 
     if (force_delete_output ||
-     (delete_output && !res[it, "has_problems"] &&
-     (!make_new_ref || (make_new_ref && any(res[, "made_new_refs"]))))) {
+     (delete_output && !any(res[, "has_problems"]) &&
+     (!make_new_ref || (make_new_ref && all(res[, "made_new_refs"]))))) {
       res[, "deleted_output"] <- sapply(dir_tests[which_tests_torun],
         function(test) delete_test_output(test))
 
