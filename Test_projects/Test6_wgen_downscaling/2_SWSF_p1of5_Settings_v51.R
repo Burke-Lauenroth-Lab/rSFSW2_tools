@@ -196,16 +196,16 @@ do.ExtractExternalDatasets <- c(
 		"ExtractClimateChangeScenarios", 1,
 
 		#Mean monthly wind, relative humidity, and 100% - sunshine
-		"ExtractSkyDataFromNOAAClimateAtlas_USA", 1,
+		"ExtractSkyDataFromNOAAClimateAtlas_USA", 0,
 		"ExtractSkyDataFromNCEPCFSR_Global", 0,
 
 		#Topography
-		"ExtractElevation_NED_USA", 1,	#1-arcsec resolution, National Elevation Dataset (ned.usgs.gov), currently downloaded only for western US
+		"ExtractElevation_NED_USA", 0,	#1-arcsec resolution, National Elevation Dataset (ned.usgs.gov), currently downloaded only for western US
 		"ExtractElevation_HWSD_Global", 0, #30-arcsec resolution, Harmonized World Soil Database
 
 		#Soil texture
 		"ExtractSoilDataFromCONUSSOILFromSTATSGO_USA", 0,
-		"ExtractSoilDataFromISRICWISEv12_Global", 1
+		"ExtractSoilDataFromISRICWISEv12_Global", 0
 )
 
 chunk_size.options <- list(
@@ -311,7 +311,7 @@ if ((any(actions == "external") || any(actions == "create") || any(actions == "e
 	datafile.cloud <- "SWRuns_InputData_cloud_v10.csv"
 	datafile.prod <- "SWRuns_InputData_prod_v10.csv"
 	datafile.siteparam <- "SWRuns_InputData_siteparam_v13.csv"
-	datafile.soils <- "SWRuns_InputData_soils_v11.csv"
+	datafile.soils <- "SWRuns_InputData_soils_v12.csv"
 	datafile.weathersetup <- "SWRuns_InputData_weathersetup_v10.csv"
 }
 if (( any(actions == "external") || any(actions == "create") || any(actions == "execute") || any(actions == "aggregate")) ) {	#input files in sub-folders ./treatments
@@ -423,7 +423,7 @@ output_aggregates <- c(
 #select variables to aggregate daily mean and SD, if "daily" is in simulation_timescales
 
 #options: NULL or at least one of c("AET", "Transpiration", "EvaporationSoil", "EvaporationSurface", "EvaporationTotal", "VWCbulk", "VWCmatric", "SWCbulk", "SWPmatric", "Snowpack", "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss", "Runoff", "Infiltration", "DeepDrainage", "PET", "TotalPrecipitation", "TemperatureMin", "TemperatureMax", "SoilTemperature")
-output_aggregate_daily <- c("AET", "Transpiration", "EvaporationSoil", "EvaporationSurface", "EvaporationTotal", "VWCbulk", "VWCmatric", "SWCbulk", "SWPmatric", "Snowpack", "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss", "Runoff", "Infiltration", "DeepDrainage", "PET", "TotalPrecipitation", "TemperatureMin", "TemperatureMax", "SoilTemperature")
+output_aggregate_daily <- NULL # c("AET", "Transpiration", "EvaporationSoil", "EvaporationSurface", "EvaporationTotal", "VWCbulk", "VWCmatric", "SWCbulk", "SWPmatric", "Snowpack", "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss", "Runoff", "Infiltration", "DeepDrainage", "PET", "TotalPrecipitation", "TemperatureMin", "TemperatureMax", "SoilTemperature")
 #select variables to output as aggregated yearly time series
 ouput_aggregated_ts <- NULL #c("Regeneration")
 
