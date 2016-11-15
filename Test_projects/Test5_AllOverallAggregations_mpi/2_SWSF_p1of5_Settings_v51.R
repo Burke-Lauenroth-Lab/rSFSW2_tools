@@ -32,6 +32,7 @@
 #---------------------------------------------SETUP------------------------------------------------#
 
 #------Clean the working environment
+# for test projects:
 # rm(list=ls(all=TRUE))
 
 #------Overall timing
@@ -122,7 +123,8 @@ saveRsoilwatOutput <- TRUE
 #store data in big input files for experimental design x treatment design
 makeInputForExperimentalDesign <- FALSE
 # fields/variables of input data for which to create maps if any(actions == "map_input")
-map_vars <- c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay", "EvapCoeff", "RH", "SkyC", "Wind", "snowd")
+map_vars <- c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay",
+  "TOC_GperKG", "EvapCoeff", "RH", "SkyC", "Wind", "snowd")
 #check completeness of SoilWat simulation directories and of temporary output aggregation files; create a list with missing directories and files
 checkCompleteness <- FALSE
 # check linked BLAS library before simulation runs
@@ -150,7 +152,7 @@ ensembleCollectSize <- 500 #This value is the chunk size for reads of 'runID' fr
 #Daily weather data: must be one of dailyweather_options; WeatherFolder in MasterInput.csv, treatmentDesign.csv, or experimentalDesign.csv
 # If a run has multiple sources for daily weather, then take the one in the first position of dailyweather_options if availble, if not then second etc.
 #	do not change/remove/add entries; only re-order to set different priorities
-dailyweather_options <- c("Maurer2002_NorthAmerica", "DayMet_NorthAmerica", "LookupWeatherFolder", "NRCan_10km_Canada", "NCEPCFSR_Global")
+dailyweather_options <- c("DayMet_NorthAmerica", "LookupWeatherFolder", "Maurer2002_NorthAmerica", "NRCan_10km_Canada", "NCEPCFSR_Global")
 #Daily weather database
 getCurrentWeatherDataFromDatabase <- TRUE
 getScenarioWeatherDataFromDatabase <- TRUE
@@ -304,27 +306,24 @@ datafile.SWRunInformation <- "SWRuns_InputMaster_Test_v11.csv"
 
 datafile.soillayers <- "SWRuns_InputData_SoilLayers_v9.csv"
 datafile.treatments <- "SWRuns_InputData_TreatmentDesign_v14.csv"
-datafile.Experimentals <- "SWRuns_InputData_ExperimentalDesign_v04.csv"
+datafile.Experimentals <- "SWRuns_InputData_ExperimentalDesign_v05.csv"
 
-if ((any(actions == "external") || any(actions == "create") || any(actions == "execute") || any(actions == "aggregate")) ) {	#input datafiles in the folder ./datafiles
-	datafile.climatescenarios <- "SWRuns_InputData_ClimateScenarios_Change_v11.csv"
-	datafile.climatescenarios_values <- "SWRuns_InputData_ClimateScenarios_Values_v11.csv"
-	datafile.cloud <- "SWRuns_InputData_cloud_v10.csv"
-	datafile.prod <- "SWRuns_InputData_prod_v10.csv"
-	datafile.siteparam <- "SWRuns_InputData_siteparam_v13.csv"
-	datafile.soils <- "SWRuns_InputData_soils_v12.csv"
-	datafile.weathersetup <- "SWRuns_InputData_weathersetup_v10.csv"
-}
-if (( any(actions == "external") || any(actions == "create") || any(actions == "execute") || any(actions == "aggregate")) ) {	#input files in sub-folders ./treatments
-	trfile.LookupClimatePPTScenarios <- "climate.ppt.csv"
-	trfile.LookupClimateTempScenarios <- "climate.temp.csv"
-	trfile.LookupShiftedPPTScenarios <- "shifted.ppt.csv"
-	trfile.LookupEvapCoeffFromTable <- "BareSoilEvaporationCoefficientsPerSoilLayer.csv"
-	trfile.LookupTranspCoeffFromTable <- "TranspirationCoefficients_v2.csv"
-	trfile.LookupTranspRegionsFromTable <- "TranspirationRegionsPerSoilLayer.csv"
-	trfile.LookupSnowDensityFromTable <- "MeanMonthlySnowDensities_v2.csv"
-	trfile.LookupVegetationComposition <- "VegetationComposition_MeanMonthly_v5.csv"
-}
+datafile.climatescenarios <- "SWRuns_InputData_ClimateScenarios_Change_v11.csv"
+datafile.climatescenarios_values <- "SWRuns_InputData_ClimateScenarios_Values_v11.csv"
+datafile.cloud <- "SWRuns_InputData_cloud_v10.csv"
+datafile.prod <- "SWRuns_InputData_prod_v10.csv"
+datafile.siteparam <- "SWRuns_InputData_siteparam_v13.csv"
+datafile.soils <- "SWRuns_InputData_soils_v12.csv"
+datafile.weathersetup <- "SWRuns_InputData_weathersetup_v10.csv"
+
+trfile.LookupClimatePPTScenarios <- "climate.ppt.csv"
+trfile.LookupClimateTempScenarios <- "climate.temp.csv"
+trfile.LookupShiftedPPTScenarios <- "shifted.ppt.csv"
+trfile.LookupEvapCoeffFromTable <- "BareSoilEvaporationCoefficientsPerSoilLayer.csv"
+trfile.LookupTranspCoeffFromTable <- "TranspirationCoefficients_v2.csv"
+trfile.LookupTranspRegionsFromTable <- "TranspirationRegionsPerSoilLayer.csv"
+trfile.LookupSnowDensityFromTable <- "MeanMonthlySnowDensities_v2.csv"
+trfile.LookupVegetationComposition <- "VegetationComposition_MeanMonthly_v5.csv"
 
 datafile.SWRWinputs_preprocessed <- "SWRuns_InputAll_PreProcessed.RData" # Storage file of input data for repeated access (faster) instead of re-reading from (slower) csv files if flag 'usePreProcessedInput' is TRUE
 
@@ -470,12 +469,9 @@ growing.season.threshold.tempC <- 4 # based on standard input of mean monthly bi
 
 # NRCS soil moisture regimes (SMR) and soil temperature regimes (STR) settings
 opt_NRCS_SMTRs <- list(
-  # Approach for regime determination
-  #   - TRUE: first, determine regime for each year; second, aggregate regimes
-  #   - FALSE: first, average moisture and temperature for each DOY;
-  #            second, determine regime for this average year
-  do_1st_regime = TRUE,
-  # Required regime aggregation agreement level (e.g., 0.5 = majority; 1 = all)
+  # Approach for regime determination ('data' -> 'conditions' -> 'regime')
+  aggregate_at = "regime",
+  # Aggregation agreement level (e.g., 0.5 = majority; 1 = all)
   crit_agree_frac = 1,
   # Restrict data to normal years (as defined by SSS 2014) if TRUE; if FALSE, use all years
   use_normal = TRUE,
@@ -535,5 +531,6 @@ if(any(actions == "create") || any(actions == "execute") || any(actions == "aggr
 ##############################################################################
 ########################Source of the code base###############################
 
+# for test projects:
 #if (!interactive())
   source(file.path(dir.code, "R", "2_SWSF_p4of5_Code_v51.R"), verbose = FALSE, chdir = FALSE)
