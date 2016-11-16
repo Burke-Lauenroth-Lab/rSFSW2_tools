@@ -12,11 +12,9 @@ execute these test projects and compare against reference databases.
 
 2. Run test projects
     - __Non-interactive__ use
-        -
-                ```Shell
+        - 
                 cd rSWSFtools/
                 ./Test_projects/Run_all_test_projects.R --help
-                ```
 
         - Examples
             - Run test project 4 and clean up
@@ -28,21 +26,15 @@ execute these test projects and compare against reference databases.
     - __Interactive__ use
         - Start R
         -
-
-                ```R
                 setwd("rSWSFtools/") # Set working directory
                 source("Test_projects/Run_all_test_projects.R")
-                ```
 
         - If the folder 'Test_projects' is not on the current path, then enter on the command prompt
 
-                ```R
                 Enter path to folder of test projects 'Test_projects':
-                ```
 
         - Provide details on your test request
 
-                ```R
                 Should the test output be used as future reference (y/n):
                 Should the test output be force deleted (y/n):
                 Should the test output be deleted (y/n):
@@ -55,13 +47,10 @@ execute these test projects and compare against reference databases.
                     6) Test6_wgen_downscaling
                     ...
                 Which of the 6 tests should be run ('all'; a single number; several numbers separated by commas; zero or a negative number to delete any temporary objects):
-                ```
 
         - If the folder 'SoilWat_R_Wrapper' cannot be located
 
-                ```R
                 Enter path to folder of 'SoilWat_R_Wrapper':
-                ```
 
 
 3. Check the outcomes
