@@ -11,7 +11,7 @@ execute these test projects and compare against reference databases.
     - If needed adjust `dir.external`, i.e., path to external datasets in p1 of test projects
 
 2. Run test projects
-    - __Non-interactive__ use
+    * __Non-interactive__ use
         - 
                 cd rSWSFtools/
                 ./Test_projects/Run_all_test_projects.R --help
@@ -23,8 +23,10 @@ execute these test projects and compare against reference databases.
                     `./Test_projects/Run_all_test_projects.R -t=5 -r -d`
             - Clean up `./Test_projects/Run_all_test_projects.R -t=0`
 
-    - __Interactive__ use
+    * __Interactive__ use
+    
         - Start R
+        
         -
                 setwd("rSWSFtools/") # Set working directory
                 source("Test_projects/Run_all_test_projects.R")
