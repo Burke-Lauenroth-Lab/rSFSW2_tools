@@ -202,15 +202,31 @@ compare_test_output <- function(dir_test, dir_ref = NULL,
 		dir_ref <- file.path(dir_test, "..", "0_ReferenceOutput")
 
 	#---Identify and connect to reference data base
-	refs <- list.files(dir_ref, pattern = basename(dir_test))
-	if (length(refs) == 0L) {
+	fname_refDB <- list.files(dir_ref, pattern = basename(dir_test))
+	if (length(fname_refDB) == 0L) {
 		diff_msgs <- c(diff_msgs, "",
 		  paste(Sys.time(), "no reference database found for", shQuote(basename(dir_test))))
 		return(diff_msgs)
+
 	} else {
-		diff_msgs <- c(diff_msgs, refs[length(refs)])
+    if (length(fname_refDB) > 1) {
+      # Identify latest version
+      temp <- strsplit(fname_refDB, split = "_")
+      temp <- sapply(temp, function(x) strsplit(x[length(x)], split = ".", fixed = TRUE))
+      v_refDB <- lapply(temp, function(x) numeric_version(paste(sub("v", "", x[-length(x)]),
+        collapse = ".")))
+      v_latest <- 1
+      for (k in seq_along(v_refDB[-1])) {
+        if (v_refDB[[v_latest]] < v_refDB[[k]])
+          v_latest <- k
+      }
+
+      fname_refDB <- fname_refDB[v_latest]
+    }
+
+		diff_msgs <- c(diff_msgs, fname_refDB)
 	}
-	refDB <- RSQLite::dbConnect(RSQLite::SQLite(), file.path(dir_ref, refs[length(refs)]))
+	refDB <- RSQLite::dbConnect(RSQLite::SQLite(), file.path(dir_ref, fname_refDB))
 
 	#---Identify and connect to test data base
 	ftemp_test <- file.path(dir_test, "4_Data_SWOutputAggregated", "dbTables.sqlite3")
