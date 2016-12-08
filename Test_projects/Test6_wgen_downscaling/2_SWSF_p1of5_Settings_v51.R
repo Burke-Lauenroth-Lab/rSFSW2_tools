@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #--------------------------------------------------------------------------------------------------#
 
 #------------------------FRAMEWORK FOR SOILWAT SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING SIMULATIONS, AND AGGREGATING OUTPUTS
@@ -30,6 +32,7 @@
 #---------------------------------------------SETUP------------------------------------------------#
 
 #------Clean the working environment
+# for test projects:
 # rm(list=ls(all=TRUE))
 
 #------Overall timing
@@ -41,7 +44,7 @@ debug.warn.level <- sum(c(print.debug, interactive()))
 debug.dump.objects <- interactive()
 
 #------Mode of framework
-minVersionRsoilwat <- "1.1.0"
+minVersionRsoilwat <- "1.1.4"
 minVersion_dbWeather <- "3.1.0"
 use_rcpp <- TRUE
 num_cores <- 4
@@ -120,13 +123,14 @@ saveRsoilwatOutput <- TRUE
 #store data in big input files for experimental design x treatment design
 makeInputForExperimentalDesign <- FALSE
 # fields/variables of input data for which to create maps if any(actions == "map_input")
-map_vars <- c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay", "EvapCoeff", "RH", "SkyC", "Wind", "snowd")
+map_vars <- c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay",
+  "TOC_GperKG", "EvapCoeff", "RH", "SkyC", "Wind", "snowd")
 #check completeness of SoilWat simulation directories and of temporary output aggregation files; create a list with missing directories and files
 checkCompleteness <- FALSE
 # check linked BLAS library before simulation runs
 check.blas <- FALSE
 
-#---Load functions
+#---Load functions (don't forget the C functions!)
 rSWSF <- file.path(dir.code, "R", "2_SWSF_p5of5_Functions_v51.RData")
 if (!file.exists(rSWSF) || !continueAfterAbort) {
   exclude_from_R <- c("2_SWSF_p2of5_CreateDB_Tables_v51.R",
@@ -163,7 +167,7 @@ ensembleCollectSize <- 500 #This value is the chunk size for reads of 'runID' fr
 #Daily weather data: must be one of dailyweather_options; WeatherFolder in MasterInput.csv, treatmentDesign.csv, or experimentalDesign.csv
 # If a run has multiple sources for daily weather, then take the one in the first position of dailyweather_options if availble, if not then second etc.
 #	do not change/remove/add entries; only re-order to set different priorities
-dailyweather_options <- c("Maurer2002_NorthAmerica", "DayMet_NorthAmerica", "LookupWeatherFolder", "NRCan_10km_Canada", "NCEPCFSR_Global")
+dailyweather_options <- c("DayMet_NorthAmerica", "LookupWeatherFolder", "Maurer2002_NorthAmerica", "NRCan_10km_Canada", "NCEPCFSR_Global")
 #Daily weather database
 getCurrentWeatherDataFromDatabase <- TRUE
 getScenarioWeatherDataFromDatabase <- TRUE
@@ -209,16 +213,16 @@ do.ExtractExternalDatasets <- c(
 		"ExtractClimateChangeScenarios", 1,
 
 		#Mean monthly wind, relative humidity, and 100% - sunshine
-		"ExtractSkyDataFromNOAAClimateAtlas_USA", 1,
+		"ExtractSkyDataFromNOAAClimateAtlas_USA", 0,
 		"ExtractSkyDataFromNCEPCFSR_Global", 0,
 
 		#Topography
-		"ExtractElevation_NED_USA", 1,	#1-arcsec resolution, National Elevation Dataset (ned.usgs.gov), currently downloaded only for western US
+		"ExtractElevation_NED_USA", 0,	#1-arcsec resolution, National Elevation Dataset (ned.usgs.gov), currently downloaded only for western US
 		"ExtractElevation_HWSD_Global", 0, #30-arcsec resolution, Harmonized World Soil Database
 
 		#Soil texture
 		"ExtractSoilDataFromCONUSSOILFromSTATSGO_USA", 0,
-		"ExtractSoilDataFromISRICWISEv12_Global", 1
+		"ExtractSoilDataFromISRICWISEv12_Global", 0
 )
 
 chunk_size.options <- list(
@@ -274,7 +278,7 @@ rownames(future_yrs) <- make.names(paste0("d", future_yrs[, "delta"], "yrs"), un
 #------Meta-information of input data
 datafile.windspeedAtHeightAboveGround <- 2 #SoilWat requires 2 m, but some datasets are at 10 m, e.g., NCEP/CRSF: this value checks windspeed height and if necessary converts to u2
 adjust.soilDepth <- FALSE # [FALSE] fill soil layer structure from shallower layer(s) or [TRUE] adjust soil depth if there is no soil texture information for the lowest layers
-requested_soil_layers <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 100, 150)
+requested_soil_layers <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150)
 increment_soiltemperature_deltaX_cm <- 5	# If SOILWAT soil temperature is simulated and the solution instable, then the soil profile layer width is increased by this value until a stable solution can be found or total failure is determined
 
 #Climate conditions
@@ -316,27 +320,24 @@ datafile.SWRunInformation <- "SWRuns_InputMaster_Test_v11.csv"
 
 datafile.soillayers <- "SWRuns_InputData_SoilLayers_v9.csv"
 datafile.treatments <- "SWRuns_InputData_TreatmentDesign_v14.csv"
-datafile.Experimentals <- "SWRuns_InputData_ExperimentalDesign_v04.csv"
+datafile.Experimentals <- "SWRuns_InputData_ExperimentalDesign_v05.csv"
 
-if ((any(actions == "external") || any(actions == "create") || any(actions == "execute") || any(actions == "aggregate")) ) {	#input datafiles in the folder ./datafiles
-	datafile.climatescenarios <- "SWRuns_InputData_ClimateScenarios_Change_v11.csv"
-	datafile.climatescenarios_values <- "SWRuns_InputData_ClimateScenarios_Values_v11.csv"
-	datafile.cloud <- "SWRuns_InputData_cloud_v10.csv"
-	datafile.prod <- "SWRuns_InputData_prod_v10.csv"
-	datafile.siteparam <- "SWRuns_InputData_siteparam_v13.csv"
-	datafile.soils <- "SWRuns_InputData_soils_v11.csv"
-	datafile.weathersetup <- "SWRuns_InputData_weathersetup_v10.csv"
-}
-if (( any(actions == "external") || any(actions == "create") || any(actions == "execute") || any(actions == "aggregate")) ) {	#input files in sub-folders ./treatments
-	trfile.LookupClimatePPTScenarios <- "climate.ppt.csv"
-	trfile.LookupClimateTempScenarios <- "climate.temp.csv"
-	trfile.LookupShiftedPPTScenarios <- "shifted.ppt.csv"
-	trfile.LookupEvapCoeffFromTable <- "BareSoilEvaporationCoefficientsPerSoilLayer.csv"
-	trfile.LookupTranspCoeffFromTable <- "TranspirationCoefficients_v2.csv"
-	trfile.LookupTranspRegionsFromTable <- "TranspirationRegionsPerSoilLayer.csv"
-	trfile.LookupSnowDensityFromTable <- "MeanMonthlySnowDensities_v2.csv"
-	trfile.LookupVegetationComposition <- "VegetationComposition_MeanMonthly_v5.csv"
-}
+datafile.climatescenarios <- "SWRuns_InputData_ClimateScenarios_Change_v11.csv"
+datafile.climatescenarios_values <- "SWRuns_InputData_ClimateScenarios_Values_v11.csv"
+datafile.cloud <- "SWRuns_InputData_cloud_v10.csv"
+datafile.prod <- "SWRuns_InputData_prod_v10.csv"
+datafile.siteparam <- "SWRuns_InputData_siteparam_v14.csv"
+datafile.soils <- "SWRuns_InputData_soils_v12.csv"
+datafile.weathersetup <- "SWRuns_InputData_weathersetup_v10.csv"
+
+trfile.LookupClimatePPTScenarios <- "climate.ppt.csv"
+trfile.LookupClimateTempScenarios <- "climate.temp.csv"
+trfile.LookupShiftedPPTScenarios <- "shifted.ppt.csv"
+trfile.LookupEvapCoeffFromTable <- "BareSoilEvaporationCoefficientsPerSoilLayer.csv"
+trfile.LookupTranspCoeffFromTable <- "TranspirationCoefficients_v2.csv"
+trfile.LookupTranspRegionsFromTable <- "TranspirationRegionsPerSoilLayer.csv"
+trfile.LookupSnowDensityFromTable <- "MeanMonthlySnowDensities_v2.csv"
+trfile.LookupVegetationComposition <- "VegetationComposition_MeanMonthly_v5.csv"
 
 datafile.SWRWinputs_preprocessed <- "SWRuns_InputAll_PreProcessed.RData" # Storage file of input data for repeated access (faster) instead of re-reading from (slower) csv files if flag 'usePreProcessedInput' is TRUE
 
@@ -348,8 +349,6 @@ accountNSHemispheres_veg <- TRUE 	#if TRUE and latitude < 0 (i.e., southern hemi
 Index_RunInformation <- NULL #indices of columns of 'SWRunInformation', e.g, c(3, 7:9), or NULL, used for outputting SoilWat-run information in addition to create_treatments and climate scenario
 
 #------Select aggregated output: time scale and variable groups
-#simulation_timescales is at least one of c("daily", "weekly", "monthly", "yearly")
-simulation_timescales <- c("daily", "monthly", "yearly")
 #turn aggregation for variable groups on (1) or off (0), don't delete any variable group labels
 output_aggregates <- c(
 					#---Aggregation: SoilWat inputs
@@ -393,6 +392,7 @@ output_aggregates <- c(
 						"dailySWPextremes", 1,
 						"dailyRechargeExtremes", 1,
 					#---Aggregation: Ecological dryness
+						"dailyNRCS_SoilMoistureTemperatureRegimes_Intermediates", 0, #Requires at least soil layers at 10, 20, 30, 50, 60, 90 cm
 						"dailyNRCS_SoilMoistureTemperatureRegimes", 0, #Requires at least soil layers at 10, 20, 30, 50, 60, 90 cm
 						"dailyNRCS_Chambers2014_ResilienceResistance", 0, #Requires "dailyNRCS_SoilMoistureTemperatureRegimes"
 					  "dailyNRCS_Maestas2016_ResilienceResistance", 0,
@@ -437,7 +437,7 @@ output_aggregates <- c(
 #select variables to aggregate daily mean and SD, if "daily" is in simulation_timescales
 
 #options: NULL or at least one of c("AET", "Transpiration", "EvaporationSoil", "EvaporationSurface", "EvaporationTotal", "VWCbulk", "VWCmatric", "SWCbulk", "SWPmatric", "Snowpack", "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss", "Runoff", "Infiltration", "DeepDrainage", "PET", "TotalPrecipitation", "TemperatureMin", "TemperatureMax", "SoilTemperature")
-output_aggregate_daily <- c("AET", "Transpiration", "EvaporationSoil", "EvaporationSurface", "EvaporationTotal", "VWCbulk", "VWCmatric", "SWCbulk", "SWPmatric", "Snowpack", "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss", "Runoff", "Infiltration", "DeepDrainage", "PET", "TotalPrecipitation", "TemperatureMin", "TemperatureMax", "SoilTemperature")
+output_aggregate_daily <- NULL # c("AET", "Transpiration", "EvaporationSoil", "EvaporationSurface", "EvaporationTotal", "VWCbulk", "VWCmatric", "SWCbulk", "SWPmatric", "Snowpack", "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss", "Runoff", "Infiltration", "DeepDrainage", "PET", "TotalPrecipitation", "TemperatureMin", "TemperatureMax", "SoilTemperature")
 #select variables to output as aggregated yearly time series
 ouput_aggregated_ts <- NULL #c("Regeneration")
 
@@ -481,6 +481,18 @@ shrub.fraction.limit <- 0.2 	#page 1213: 0.2 in Paruelo JM, Lauenroth WK (1996) 
 growing.season.threshold.tempC <- 10 # based on Trewartha's D temperateness definition (with >=4 & < 8 months with > 10C)
 growing.season.threshold.tempC <- 4 # based on standard input of mean monthly biomass values for vegetation composition
 
+# NRCS soil moisture regimes (SMR) and soil temperature regimes (STR) settings
+opt_NRCS_SMTRs <- list(
+  # Approach for regime determination ('data' -> 'conditions' -> 'regime')
+  aggregate_at = "regime",
+  # Aggregation agreement level (e.g., 0.5 = majority; 1 = all)
+  crit_agree_frac = 1,
+  # Restrict data to normal years (as defined by SSS 2014) if TRUE; if FALSE, use all years
+  use_normal = TRUE,
+  SWP_dry = -1.5,       #dry means SWP below -1.5 MPa (Soil Survey Staff 2014: p.29)
+  SWP_sat = -0.033,     #saturated means SWP above -0.033 MPa
+  impermeability = 0.9  #impermeable layer
+)
 
 #------SoilWat files
 sw <- "sw_v31"
@@ -533,5 +545,6 @@ if(any(actions == "create") || any(actions == "execute") || any(actions == "aggr
 ##############################################################################
 ########################Source of the code base###############################
 
+# for test projects:
 #if (!interactive())
   source(file.path(dir.code, "R", "2_SWSF_p4of5_Code_v51.R"), verbose = FALSE, chdir = FALSE)

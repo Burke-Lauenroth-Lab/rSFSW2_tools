@@ -134,6 +134,7 @@ dir.code <- normalizePath(dir.code)
 
 
 #---Load functions
+cat("\n")
 source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
 
 
