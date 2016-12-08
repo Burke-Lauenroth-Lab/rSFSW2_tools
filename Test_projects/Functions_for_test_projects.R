@@ -91,7 +91,7 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 
     if (make_new_ref && !all(res[, "has_problems"])) {
       res[, "made_new_refs"] <- sapply(dir_tests[which_tests_torun],
-        function(test) make_test_output_reference(test))
+        function(test) make_test_output_reference(test, dir_swsf = dir_swsf))
 
     } else {
       res[, "made_new_refs"] <- FALSE
@@ -119,13 +119,16 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 #'
 #' @param dir_test A character string. Path to test project folder.
 #' @param dir_ref A character string. Path to folder with reference database.
+#' @param dir_swsf A character string. Path to folder with SWSF code.
 #' @param SWSF_version A character string. The version ID of the simulation framework as
 #'  reported by the file \code{DESCRIPTION}.
 #'
 #' @return A logical value. \code{TRUE} if successful.
-make_test_output_reference <- function(dir_test, dir_ref = NULL, SWSF_version = NULL) {
+make_test_output_reference <- function(dir_test, dir_ref = NULL, dir_swsf = NULL,
+  SWSF_version = NULL) {
+
   if (is.null(SWSF_version)) {
-    temp <- readLines(file.path(dir_test, "..", "..", "DESCRIPTION"))
+    temp <- readLines(file.path(dir_swsf, "DESCRIPTION"))
     v <- grep("Version: ", temp, value = TRUE)
     if (length(v) > 0) {
       v <- strsplit(v[1], "Version: ", fixed = TRUE)[[1]][2]

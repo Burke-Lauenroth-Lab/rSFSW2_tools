@@ -108,6 +108,7 @@ dir.out <- file.path(dir.big, "4_Data_SWOutputAggregated")	#path to aggregated o
 #	- output handling
 #		- "concatenate": moves results from the simulation runs (temporary text files) to a SQL-database
 #		- "ensemble": calculates 'ensembles' across climate scenarios and stores the results in additional SQL-databases as specified by 'ensemble.families' and 'ensemble.levels'
+#   - "check": check completeness of output database
 actions <- c("create", "execute", "aggregate", "concatenate", "check")
 #continues with unfinished part of simulation after abort if TRUE, i.e.,
 #	- it doesn't delete an existing weather database, if a new one is requested
@@ -125,8 +126,6 @@ makeInputForExperimentalDesign <- FALSE
 # fields/variables of input data for which to create maps if any(actions == "map_input")
 map_vars <- c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay",
   "TOC_GperKG", "EvapCoeff", "RH", "SkyC", "Wind", "snowd")
-#check completeness of SoilWat simulation directories and of temporary output aggregation files; create a list with missing directories and files
-checkCompleteness <- FALSE
 # check linked BLAS library before simulation runs
 check.blas <- FALSE
 
@@ -135,7 +134,7 @@ rSWSF <- file.path(dir.code, "R", "2_SWSF_p5of5_Functions_v51.RData")
 if (!file.exists(rSWSF) || !continueAfterAbort) {
   exclude_from_R <- c("2_SWSF_p2of5_CreateDB_Tables_v51.R",
     "2_SWSF_p3of5_ExternalDataExtractions_v51.R", "2_SWSF_p4of5_Code_v51.R",
-    "5_Database_Functions.R", "Check_WeatherDatabase.R", "SWSF_cpp_functions.R")
+    "Check_WeatherDatabase.R", "SWSF_cpp_functions.R")
   temp <- list.files(file.path(dir.code, "R"), pattern = ".r", ignore.case = TRUE,
     full.names = TRUE)
   ntemp <- nchar(temp)
@@ -320,12 +319,12 @@ datafile.SWRunInformation <- "SWRuns_InputMaster_Test_v11.csv"
 
 datafile.soillayers <- "SWRuns_InputData_SoilLayers_v9.csv"
 datafile.treatments <- "SWRuns_InputData_TreatmentDesign_v14.csv"
-datafile.Experimentals <- "SWRuns_InputData_ExperimentalDesign_v05.csv"
+datafile.Experimentals <- "SWRuns_InputData_ExperimentalDesign_v06.csv"
 
 datafile.climatescenarios <- "SWRuns_InputData_ClimateScenarios_Change_v11.csv"
 datafile.climatescenarios_values <- "SWRuns_InputData_ClimateScenarios_Values_v11.csv"
 datafile.cloud <- "SWRuns_InputData_cloud_v10.csv"
-datafile.prod <- "SWRuns_InputData_prod_v10.csv"
+datafile.prod <- "SWRuns_InputData_prod_v11.csv"
 datafile.siteparam <- "SWRuns_InputData_siteparam_v14.csv"
 datafile.soils <- "SWRuns_InputData_soils_v12.csv"
 datafile.weathersetup <- "SWRuns_InputData_weathersetup_v10.csv"
