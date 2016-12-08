@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #--------------------------------------------------------------------------------------------------#
 
 #------------------------FRAMEWORK FOR SOILWAT SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING SIMULATIONS, AND AGGREGATING OUTPUTS
@@ -41,7 +43,7 @@ debug.warn.level <- sum(c(print.debug, interactive()))
 debug.dump.objects <- interactive()
 
 #------Mode of framework
-minVersionRsoilwat <- "1.1.0"
+minVersionRsoilwat <- "1.1.4"
 minVersion_dbWeather <- "3.1.0"
 use_rcpp <- TRUE
 num_cores <- 4
@@ -105,7 +107,8 @@ dir.out <- file.path(dir.big, "4_Data_SWOutputAggregated")	#path to aggregated o
 #	- output handling
 #		- "concatenate": moves results from the simulation runs (temporary text files) to a SQL-database
 #		- "ensemble": calculates 'ensembles' across climate scenarios and stores the results in additional SQL-databases as specified by 'ensemble.families' and 'ensemble.levels'
-actions <- c("create", "execute", "aggregate", "concatenate")
+#   - "check": check completeness of output database
+actions <- c("create", "execute", "aggregate", "concatenate", "check")
 #continues with unfinished part of simulation after abort if TRUE, i.e.,
 #	- it doesn't delete an existing weather database, if a new one is requested
 #	- it doesn't re-extract external information (soils, elevation, climate normals, NCEPCFSR) if already extracted
@@ -121,17 +124,15 @@ saveRsoilwatOutput <- TRUE
 makeInputForExperimentalDesign <- FALSE
 # fields/variables of input data for which to create maps if any(actions == "map_input")
 map_vars <- c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay", "EvapCoeff", "RH", "SkyC", "Wind", "snowd")
-#check completeness of SoilWat simulation directories and of temporary output aggregation files; create a list with missing directories and files
-checkCompleteness <- FALSE
 # check linked BLAS library before simulation runs
 check.blas <- FALSE
 
-#---Load functions
+#---Load functions (don't forget the C functions!)
 rSWSF <- file.path(dir.code, "R", "2_SWSF_p5of5_Functions_v51.RData")
 if (!file.exists(rSWSF) || !continueAfterAbort) {
   exclude_from_R <- c("2_SWSF_p2of5_CreateDB_Tables_v51.R",
     "2_SWSF_p3of5_ExternalDataExtractions_v51.R", "2_SWSF_p4of5_Code_v51.R",
-    "5_Database_Functions.R", "Check_WeatherDatabase.R", "SWSF_cpp_functions.R")
+    "Check_WeatherDatabase.R", "SWSF_cpp_functions.R")
   temp <- list.files(file.path(dir.code, "R"), pattern = ".r", ignore.case = TRUE,
     full.names = TRUE)
   ntemp <- nchar(temp)
@@ -163,7 +164,7 @@ ensembleCollectSize <- 500 #This value is the chunk size for reads of 'runID' fr
 #Daily weather data: must be one of dailyweather_options; WeatherFolder in MasterInput.csv, treatmentDesign.csv, or experimentalDesign.csv
 # If a run has multiple sources for daily weather, then take the one in the first position of dailyweather_options if availble, if not then second etc.
 #	do not change/remove/add entries; only re-order to set different priorities
-dailyweather_options <- c("Maurer2002_NorthAmerica", "DayMet_NorthAmerica", "LookupWeatherFolder", "NRCan_10km_Canada", "NCEPCFSR_Global")
+dailyweather_options <- c("DayMet_NorthAmerica", "LookupWeatherFolder", "Maurer2002_NorthAmerica", "NRCan_10km_Canada", "NCEPCFSR_Global")
 #Daily weather database
 getCurrentWeatherDataFromDatabase <- TRUE
 getScenarioWeatherDataFromDatabase <- TRUE
@@ -274,7 +275,7 @@ rownames(future_yrs) <- make.names(paste0("d", future_yrs[, "delta"], "yrs"), un
 #------Meta-information of input data
 datafile.windspeedAtHeightAboveGround <- 2 #SoilWat requires 2 m, but some datasets are at 10 m, e.g., NCEP/CRSF: this value checks windspeed height and if necessary converts to u2
 adjust.soilDepth <- FALSE # [FALSE] fill soil layer structure from shallower layer(s) or [TRUE] adjust soil depth if there is no soil texture information for the lowest layers
-requested_soil_layers <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 100, 150)
+requested_soil_layers <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150)
 increment_soiltemperature_deltaX_cm <- 5	# If SOILWAT soil temperature is simulated and the solution instable, then the soil profile layer width is increased by this value until a stable solution can be found or total failure is determined
 
 #Climate conditions
@@ -348,8 +349,6 @@ accountNSHemispheres_veg <- TRUE 	#if TRUE and latitude < 0 (i.e., southern hemi
 Index_RunInformation <- NULL #indices of columns of 'SWRunInformation', e.g, c(3, 7:9), or NULL, used for outputting SoilWat-run information in addition to create_treatments and climate scenario
 
 #------Select aggregated output: time scale and variable groups
-#simulation_timescales is at least one of c("daily", "weekly", "monthly", "yearly")
-simulation_timescales <- c("daily", "monthly", "yearly")
 #turn aggregation for variable groups on (1) or off (0), don't delete any variable group labels
 output_aggregates <- c(
 					#---Aggregation: SoilWat inputs
