@@ -134,6 +134,7 @@ dir.code <- normalizePath(dir.code)
 
 
 #---Load functions
+cat("\n")
 source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
 
 
@@ -151,3 +152,5 @@ if (any(which_tests_torun > 0)) {
 
 setwd(dir.old)
 print(paste0(Sys.time(), ": end of SWSF test projects"))
+
+warnings()

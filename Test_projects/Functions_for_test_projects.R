@@ -91,15 +91,15 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 
     if (make_new_ref && !all(res[, "has_problems"])) {
       res[, "made_new_refs"] <- sapply(dir_tests[which_tests_torun],
-        function(test) make_test_output_reference(test))
+        function(test) make_test_output_reference(test, dir_swsf = dir_swsf))
 
     } else {
       res[, "made_new_refs"] <- FALSE
     }
 
     if (force_delete_output ||
-     (delete_output && !res[it, "has_problems"] &&
-     (!make_new_ref || (make_new_ref && any(res[, "made_new_refs"]))))) {
+     (delete_output && !any(res[, "has_problems"]) &&
+     (!make_new_ref || (make_new_ref && all(res[, "made_new_refs"]))))) {
       res[, "deleted_output"] <- sapply(dir_tests[which_tests_torun],
         function(test) delete_test_output(test))
 
@@ -119,13 +119,16 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 #'
 #' @param dir_test A character string. Path to test project folder.
 #' @param dir_ref A character string. Path to folder with reference database.
+#' @param dir_swsf A character string. Path to folder with SWSF code.
 #' @param SWSF_version A character string. The version ID of the simulation framework as
 #'  reported by the file \code{DESCRIPTION}.
 #'
 #' @return A logical value. \code{TRUE} if successful.
-make_test_output_reference <- function(dir_test, dir_ref = NULL, SWSF_version = NULL) {
+make_test_output_reference <- function(dir_test, dir_ref = NULL, dir_swsf = NULL,
+  SWSF_version = NULL) {
+
   if (is.null(SWSF_version)) {
-    temp <- readLines(file.path(dir_test, "..", "..", "DESCRIPTION"))
+    temp <- readLines(file.path(dir_swsf, "DESCRIPTION"))
     v <- grep("Version: ", temp, value = TRUE)
     if (length(v) > 0) {
       v <- strsplit(v[1], "Version: ", fixed = TRUE)[[1]][2]
@@ -199,15 +202,31 @@ compare_test_output <- function(dir_test, dir_ref = NULL,
 		dir_ref <- file.path(dir_test, "..", "0_ReferenceOutput")
 
 	#---Identify and connect to reference data base
-	refs <- list.files(dir_ref, pattern = basename(dir_test))
-	if (length(refs) == 0L) {
+	fname_refDB <- list.files(dir_ref, pattern = basename(dir_test))
+	if (length(fname_refDB) == 0L) {
 		diff_msgs <- c(diff_msgs, "",
 		  paste(Sys.time(), "no reference database found for", shQuote(basename(dir_test))))
 		return(diff_msgs)
+
 	} else {
-		diff_msgs <- c(diff_msgs, refs[length(refs)])
+    if (length(fname_refDB) > 1) {
+      # Identify latest version
+      temp <- strsplit(fname_refDB, split = "_")
+      temp <- sapply(temp, function(x) strsplit(x[length(x)], split = ".", fixed = TRUE))
+      v_refDB <- lapply(temp, function(x) numeric_version(paste(sub("v", "", x[-length(x)]),
+        collapse = ".")))
+      v_latest <- 1
+      for (k in seq_along(v_refDB[-1])) {
+        if (v_refDB[[v_latest]] < v_refDB[[k]])
+          v_latest <- k
+      }
+
+      fname_refDB <- fname_refDB[v_latest]
+    }
+
+		diff_msgs <- c(diff_msgs, fname_refDB)
 	}
-	refDB <- RSQLite::dbConnect(RSQLite::SQLite(), file.path(dir_ref, refs[length(refs)]))
+	refDB <- RSQLite::dbConnect(RSQLite::SQLite(), file.path(dir_ref, fname_refDB))
 
 	#---Identify and connect to test data base
 	ftemp_test <- file.path(dir_test, "4_Data_SWOutputAggregated", "dbTables.sqlite3")
