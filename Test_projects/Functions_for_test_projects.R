@@ -55,7 +55,9 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 
           if (length(comp) > 0) {
             res[k, "referenceDB"] <- comp[[1]]
-          } else if (length(comp) > 1) {
+          }
+
+          if (length(comp) > 1) {
             problems2 <- c(problems2,
               paste("Problem list for test project", shQuote(basename(dir_tests[it])), ":"),
               comp[-1])
@@ -261,28 +263,31 @@ compare_test_output <- function(dir_test, dir_ref = NULL,
 	}
 
 	#---Confirm that 'design' of test agrees with reference
-	design_tables <- c("experimental_labels", "header", "run_labels", "runs",
-		"scenario_labels", "simulation_years", "sites", "sqlite_sequence", "treatments",
-		"weatherfolders")
-	has_samedesign <- all(design_tables %in% tocomp_tables)
-	if (has_samedesign) {
-		has_samedesign <- all(sapply(design_tables, function(desT) {
+	has_samedesign <- headerTables() %in% tocomp_tables
+	diff_design <- NULL
+
+	if (all(has_samedesign)) {
+		diff_design <- sapply(headerTables(), function(desT) {
 			temp <- RSQLite::dbReadTable(refDB, desT)
 			x_ref <- temp[do.call("order", unname(temp)), ]
 
 			temp <- RSQLite::dbReadTable(testDB, desT)
 			x_test <- temp[do.call("order", unname(temp)), ]
 
-			identical(x_ref, x_test)
-		}))
+			all.equal(x_ref, x_test)
+		})
+
+		has_samedesign <- sapply(diff_design, function(x) is.logical(x) && isTRUE(x))
 	}
-	if (!has_samedesign) {
+
+	if (any(!has_samedesign)) {
 		diff_msgs <- c(diff_msgs,
-		  paste(Sys.time(), "reference and test database have a different design and cannot be compared"))
+		  paste(Sys.time(), "reference and test database have a different design and cannot be compared"),
+		  if (!is.null(diff_design)) diff_design[!has_samedesign] else NULL)
 		return(diff_msgs)
 	}
 
-	tocomp_tables <- tocomp_tables[!(tocomp_tables %in% design_tables)]
+	tocomp_tables <- tocomp_tables[!(tocomp_tables %in% headerTables())]
 
 
 	#---Loop over shared result tables and compare shared fields
