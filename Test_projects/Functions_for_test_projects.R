@@ -88,7 +88,11 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 
         fname_report <- paste0(format(Sys.time(), "%Y%m%d-%H%M"), "_", fname_report)
         print(paste("See problem report in file", shQuote(fname_report)))
-        writeLines(unlist(problems), con = file.path(dir_test, fname_report))
+
+        temp <- rep(names(problems), times = lengths(problems))
+        temp <- paste0(temp, ifelse(nchar(temp) > 0, ": ", ""))
+        temp <- paste0(temp, unlist(problems))
+        writeLines(temp, con = file.path(dir_test, fname_report))
     }
 
     if (make_new_ref && !all(res[, "has_problems"])) {
@@ -218,7 +222,7 @@ compare_test_output <- function(dir_test, dir_ref = NULL,
       v_refDB <- lapply(temp, function(x) numeric_version(paste(sub("v", "", x[-length(x)]),
         collapse = ".")))
       v_latest <- 1
-      for (k in seq_along(v_refDB[-1])) {
+      for (k in seq_along(v_refDB)[-1]) {
         if (v_refDB[[v_latest]] < v_refDB[[k]])
           v_latest <- k
       }
@@ -282,9 +286,8 @@ compare_test_output <- function(dir_test, dir_ref = NULL,
 
 	if (any(!has_samedesign)) {
 		diff_msgs <- c(diff_msgs,
-		  paste(Sys.time(), "reference and test database have a different design and cannot be compared"),
+		  paste(Sys.time(), "reference and test database have a different design"),
 		  if (!is.null(diff_design)) diff_design[!has_samedesign] else NULL)
-		return(diff_msgs)
 	}
 
 	tocomp_tables <- tocomp_tables[!(tocomp_tables %in% headerTables())]
