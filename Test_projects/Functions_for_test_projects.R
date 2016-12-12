@@ -267,11 +267,11 @@ compare_test_output <- function(dir_test, dir_ref = NULL,
 	}
 
 	#---Confirm that 'design' of test agrees with reference
-	has_samedesign <- headerTables() %in% tocomp_tables
+	has_samedesign <- dbOutput_ListDesignTables() %in% tocomp_tables
 	diff_design <- NULL
 
 	if (all(has_samedesign)) {
-		diff_design <- sapply(headerTables(), function(desT) {
+		diff_design <- sapply(dbOutput_ListDesignTables(), function(desT) {
 			temp <- RSQLite::dbReadTable(refDB, desT)
 			x_ref <- temp[do.call("order", unname(temp)), ]
 
@@ -290,7 +290,7 @@ compare_test_output <- function(dir_test, dir_ref = NULL,
 		  if (!is.null(diff_design)) diff_design[!has_samedesign] else NULL)
 	}
 
-	tocomp_tables <- tocomp_tables[!(tocomp_tables %in% headerTables())]
+	tocomp_tables <- tocomp_tables[!(tocomp_tables %in% dbOutput_ListDesignTables())]
 
 
 	#---Loop over shared result tables and compare shared fields
