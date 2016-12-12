@@ -41,6 +41,7 @@ be.quiet <- FALSE
 eta.estimate <- interactive()
 print.debug <- interactive()
 debug.warn.level <- sum(c(print.debug, interactive()))
+debug.warn.level <- 1 #TODO: remove
 debug.dump.objects <- interactive()
 
 #------Mode of framework
