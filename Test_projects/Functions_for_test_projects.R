@@ -15,9 +15,10 @@
 #'  as new reference.
 #'
 #' @return A data.frame where each row represents the outcomes of a test project. The
-#'  The columns return four logical values \code{has_run}, \code{has_problems},
-#'  \code{made_new_refs}, \code{deleted_output}, and one character string \code{referenceDB}
-#'  of the reference database name against which this run of the test project was compared.
+#'  The columns return elapsed time in seconds, four logical values \code{has_run},
+#'  \code{has_problems}, \code{made_new_refs}, \code{deleted_output}, and one character
+#'  string \code{referenceDB} of the reference database name against which this run of
+#'  the test project was compared.
 run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = NULL,
                               which_tests_torun = seq_along(dir_tests),
                               delete_output = FALSE,
@@ -32,8 +33,9 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 
   problems <- list()
   fname_report <- "Test_project_report.txt"
-  res <- data.frame(matrix(FALSE, nrow = length(which_tests_torun), ncol = 4,
-    dimnames = list(NULL, c("has_run", "has_problems", "made_new_refs", "deleted_output"))),
+  vars <- c("elapsed_s", "has_run", "has_problems", "made_new_refs", "deleted_output")
+  res <- data.frame(matrix(FALSE, nrow = length(which_tests_torun), ncol = length(vars),
+      dimnames = list(paste0("Test", which_tests_torun), vars)),
     referenceDB = vector("character", length(which_tests_torun)),
     stringsAsFactors = FALSE)
 
@@ -47,10 +49,13 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 
       if (length(test_code) == 1L) {
         setwd(if (interactive()) file.path(dir_test, "..") else dir_tests[it])
-        temp <- try(source(file.path(dir_tests[it], test_code), verbose = FALSE, chdir = FALSE))
+
+        ctime <- system.time(temp <- try(source(file.path(dir_tests[it], test_code),
+          verbose = FALSE, chdir = FALSE)))
 
         if (!inherits(temp, "try-error")) {
           res[k, "has_run"] <- TRUE
+          res[k, "elapsed_s"] <- ctime["elapsed"]
           comp <- compare_test_output(dir_tests[it])
 
           if (length(comp) > 0) {
