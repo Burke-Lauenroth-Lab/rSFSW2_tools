@@ -48,7 +48,7 @@ minVersionRsoilwat <- "1.1.4"
 minVersion_dbWeather <- "3.1.0"
 use_rcpp <- TRUE
 num_cores <- 4
-parallel_backend <- "snow" #"snow" or "multicore" or "mpi"
+parallel_backend <- "cluster" # "cluster" (via package 'parallel') or "mpi" (via 'Rmpi')
 parallel_runs <- !interactive()
 
 #------Computation time requests------#
