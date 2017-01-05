@@ -171,14 +171,21 @@ make_test_output_reference <- function(dir_test, dir_ref = NULL, dir_swsf = NULL
 
 #' Delete output of a test project
 delete_test_output <- function(dir_test) {
-		try(unlink(file.path(dir_test, list.files(dir_test, pattern = "last.dump"))), silent = TRUE)
-		try(unlink(file.path(dir_test, list.files(dir_test, pattern = ".log"))), silent = TRUE)
-		try(unlink(file.path(dir_test, ".Rapp.history")), silent = TRUE)
-		try(unlink(file.path(dir_test, "1_Data_SWInput", "dbWeatherData_test.sqlite3")), silent = TRUE)
-		try(unlink(file.path(dir_test, "1_Data_SWInput", "SWRuns_InputAll_PreProcessed.RData")), silent = TRUE)
-		try(unlink(file.path(dir_test, "1_Data_SWInput", "swrun", ".Rapp.history")), silent = TRUE)
-		try(unlink(file.path(dir_test, "3_Runs"), recursive = TRUE), silent = TRUE)
-		try(unlink(file.path(dir_test, "4_Data_SWOutputAggregated"), recursive = TRUE), silent = TRUE)
+  files_to_delete <- c(
+    list.files(dir_test, pattern = "last.dump", recursive = TRUE, full.names = TRUE),
+    list.files(dir_test, pattern = ".log", recursive = TRUE, full.names = TRUE),
+    list.files(dir_test, pattern = ".Rapp.history", recursive = TRUE, full.names = TRUE),
+    list.files(dir_test, pattern = "ClimDB_failedLocations_", recursive = TRUE,
+      full.names = TRUE),
+    file.path(dir_test, "1_Data_SWInput", "dbWeatherData_test.sqlite3"),
+    file.path(dir_test, "1_Data_SWInput", "SWRuns_InputAll_PreProcessed.RData"))
+
+  dirs_to_delete <- c(
+    file.path(dir_test, "3_Runs"),
+    file.path(dir_test, "4_Data_SWOutputAggregated"))
+
+  try(unlink(unlist(files_to_delete)), silent = TRUE)
+  try(unlink(unlist(dirs_to_delete), recursive = TRUE), silent = TRUE)
 
   invisible(TRUE)
 }
