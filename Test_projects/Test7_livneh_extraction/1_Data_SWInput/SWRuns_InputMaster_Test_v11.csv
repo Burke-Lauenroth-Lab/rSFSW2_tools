@@ -1,0 +1,2 @@
+Label,site_id,WeatherFolder,X_WGS84,Y_WGS84,ELEV_m,Include_YN,dailyweather_source,GCM_sources,Include_YN_ClimateScenarioSources,SoilTexture_source,Include_YN_SoilSources,Elevation_source,Include_YN_ElevationSources,ClimateNormals_source,Include_YN_ClimateNormalSources
+Site01,1,Site01_weatherdata,-106.29953,35.76555,2072,1,Livneh_NorthAmerica,CMIP5_BCSD_GDODCPUCLLNL_USA,1,ISRICWISEv12_Global,1,Elevation_NED_USA,1,ClimateNormals_NCDC2005_USA,1
