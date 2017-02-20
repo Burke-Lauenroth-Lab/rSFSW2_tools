@@ -16,7 +16,7 @@
 #------ Paths to simulation framework project folders
 project_paths <- list(
   dir_prj = dir_prj <- {# path to simulation project
-    temp <- file.path(".", "Test_projects", "Test4_AllOverallAggregations_snow")
+    temp <- "SWSF_default_project" # "~/YOURPROJECT"
 
     if (dir.exists(temp)) {
       if (interactive()) setwd(temp)
@@ -52,7 +52,7 @@ project_paths <- list(
   dir_out_traces = file.path(dir_out, "Time_Traces"),
 
   # Path from where external data are extraced
-  dir_external = dir_ex <- file.path("/Volumes", "BookDuo_12TB", "BigData", "GIS", "Data"),
+  dir_external = dir_ex <- file.path("/Volumes", "YOURDRIVE", "BigData", "GIS", "Data"),
   # Path to historic weather and climate data including
   #   Livneh, Maurer, ClimateAtlas, and NCEPCFSR data
   dir_ex_weather = file.path(dir_ex, "Weather_Past"),
@@ -67,7 +67,7 @@ project_paths <- list(
 
 #------ Base names or full names of input files
 fnames_in <- list(
-  fmaster = "SWRuns_InputMaster_Test_v11.csv",
+  fmaster = "SWRuns_InputMaster_YOURPROJECT_v11.csv",
 
   fslayers = "SWRuns_InputData_SoilLayers_v9.csv",
   ftreatDesign = "SWRuns_InputData_TreatmentDesign_v14.csv",
@@ -98,7 +98,7 @@ fnames_in <- list(
   fdbWeather = file.path(project_paths[["dir_in"]], "dbWeatherData.sqlite3"),
 
   # Raster describing spatial interpretation of simulation experiment if scorp == "cell"
-  fsimraster = file.path(project_paths[["dir_in"]], "sim_raster.grd")
+  fsimraster = file.path(project_paths[["dir_in"]], "YOURRASTER.FILE")
 )
 
 
@@ -261,11 +261,11 @@ opt_out_fix <- list(
 #  - elevation: "ExtractElevation_NED_USA", "ExtractElevation_HWSD_Global",
 #  - climate normals: "ExtractSkyDataFromNOAAClimateAtlas_USA"
 #     NOTE: not implemented for 'ExtractSkyDataFromNCEPCFSR_Global'
-in_space <- list(
+sim_space <- list(
   scorp = scorp <- "point",
 
   # Resolution of raster cells
-  sim_res = if (scorp == "cell") c(1e4, 1e4) else NA,
+  sim_res = if (scorp == "cell") c(1e4, 1e4) else NULL,
   # Coordinate reference system (CRS)
   sim_crs = if (scorp == "cell") {
       "+init=epsg:5072" # NAD83(HARN) / Conus Albers
@@ -313,7 +313,28 @@ req_scens <- list(
   #   If climate datafiles used, then in the order of data in the those datafiles
   # This is a list of all GCMs for CMIP5 provided by GDO-DCP-UC-LLNL: 37 RCP4.5, 35 RCP8.5
   #   Excluded: 'HadCM3' and 'MIROC4h' because data only available until 2035
-  models = c(),
+  models = c("RCP45.ACCESS1-0", "RCP45.ACCESS1-3", "RCP45.bcc-csm1-1",
+    "RCP45.bcc-csm1-1-m", "RCP45.BNU-ESM", "RCP45.CanESM2", "RCP45.CCSM4",
+    "RCP45.CESM1-BGC", "RCP45.CESM1-CAM5", "RCP45.CMCC-CM", "RCP45.CNRM-CM5",
+    "RCP45.CSIRO-Mk3-6-0", "RCP45.EC-EARTH", "RCP45.FGOALS-g2", "RCP45.FGOALS-s2",
+    "RCP45.FIO-ESM", "RCP45.GFDL-CM3", "RCP45.GFDL-ESM2G", "RCP45.GFDL-ESM2M",
+    "RCP45.GISS-E2-H-CC", "RCP45.GISS-E2-R", "RCP45.GISS-E2-R-CC", "RCP45.HadGEM2-AO",
+    "RCP45.HadGEM2-CC", "RCP45.HadGEM2-ES", "RCP45.inmcm4", "RCP45.IPSL-CM5A-LR",
+    "RCP45.IPSL-CM5A-MR", "RCP45.IPSL-CM5B-LR", "RCP45.MIROC-ESM", "RCP45.MIROC-ESM-CHEM",
+    "RCP45.MIROC5", "RCP45.MPI-ESM-LR", "RCP45.MPI-ESM-MR", "RCP45.MRI-CGCM3",
+    "RCP45.NorESM1-M", "RCP45.NorESM1-ME",
+
+             "RCP85.ACCESS1-0", "RCP85.ACCESS1-3", "RCP85.bcc-csm1-1",
+    "RCP85.bcc-csm1-1-m", "RCP85.BNU-ESM", "RCP85.CanESM2", "RCP85.CCSM4",
+    "RCP85.CESM1-BGC", "RCP85.CESM1-CAM5", "RCP85.CMCC-CM", "RCP85.CNRM-CM5",
+    "RCP85.CSIRO-Mk3-6-0", "RCP85.EC-EARTH", "RCP85.FGOALS-g2", "RCP85.FGOALS-s2",
+    "RCP85.FIO-ESM", "RCP85.GFDL-CM3", "RCP85.GFDL-ESM2G", "RCP85.GFDL-ESM2M",
+                          "RCP85.GISS-E2-R",                       "RCP85.HadGEM2-AO",
+    "RCP85.HadGEM2-CC", "RCP85.HadGEM2-ES", "RCP85.inmcm4", "RCP85.IPSL-CM5A-LR",
+    "RCP85.IPSL-CM5A-MR", "RCP85.IPSL-CM5B-LR", "RCP85.MIROC-ESM", "RCP85.MIROC-ESM-CHEM",
+    "RCP85.MIROC5", "RCP85.MPI-ESM-LR", "RCP85.MPI-ESM-MR", "RCP85.MRI-CGCM3",
+    "RCP85.NorESM1-M", "RCP85.NorESM1-ME"
+  ),
 
   sources = c(
     # For each climate data set from which to extract, add an element like 'dataset1'
@@ -327,7 +348,7 @@ req_scens <- list(
     #     - "BCSD_GDODCPUCLLNL_USA": monthly time series at 1/8-degree resolution
     #     - "BCSD_GDODCPUCLLNL_Global": monthly time series at 1/2-degree resolution
     #     - "BCSD_NEX_USA": monthly time series at 30-arcsec resolution; requires live internet access
-      dataset1 = "CMIP5_BCSD_GDODCPUCLLNL_USA"
+      dataset1 = "CMIP5_BCSD_SageSeer_USA"
   ),
 
   # Downscaling method (applied to each each climate.conditions)
@@ -410,6 +431,10 @@ req_scens <- list(
 #------ Requested output
 # Turn aggregation for variable groups on (1) or off (0), don't delete any names
 req_out <- list(
+  # Fields/variables of input data for which to create maps if actions[["check_inputs"]]
+  map_vars = c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay",
+    "TOC_GperKG", "EvapCoeff", "RH", "SkyC", "Wind", "snowd"),
+
   # Overall aggregated output table
   overall_out = c(
   #---Aggregation: SOILWAT2 inputs
@@ -520,7 +545,7 @@ opt_agg <- list(
     # Do [no] aggregate soil layers
     #   - TRUE, aggregate into 1-4 layers for mean/stats::sd
     #   - FALSE, output values for every simulated soil layer
-    do = TRUE,
+    do = FALSE,
     # Depth of aggregated soil layers
     #   Options: depth in centimeters or
     #   - NULL is interpreted as deepest soil layer (not available for first)
