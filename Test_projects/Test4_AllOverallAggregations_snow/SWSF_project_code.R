@@ -60,7 +60,7 @@ actions <- list(
   #     in additional SQL-databases as specified by 'ensemble.families' and 'ensemble.levels'
   ensemble = FALSE,
   #   - Check completeness of output database
-  check_dbOut = FALSE
+  check_dbOut = TRUE
 )
 
 
@@ -70,7 +70,7 @@ actions <- list(
 
 dir_prj <- "SWSF_default_project"
 
-if (FALSE) {
+if (TRUE) {
   # If this is a test project:
   #   * if interactive: current working directory must be rSWSFtools/
   #   * if !interactive: current working directory must be folder of test projects,
