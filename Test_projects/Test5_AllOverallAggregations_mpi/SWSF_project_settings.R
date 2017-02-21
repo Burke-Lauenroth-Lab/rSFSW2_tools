@@ -43,7 +43,7 @@ opt_parallel <- list(
   # Number of cores/workers/slaves if job is run in parallel
   num_cores = 4,
   # Parallel_backend: "cluster" (via package 'parallel') or "mpi" (via 'Rmpi')
-  parallel_backend = "cluster",
+  parallel_backend = "mpi",
 
   # Computation time requests: time limits are only enforced if is.finite(wall_time_s)
   opt_job_time = list(

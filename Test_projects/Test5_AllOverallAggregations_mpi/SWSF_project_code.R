@@ -76,7 +76,7 @@ if (TRUE) {
   #   * if !interactive: current working directory must be folder of test projects,
   #       * e.g., rSWSFtools/Test_projects/Test4_AllOverallAggregations
   if (interactive()) {
-    dir_prj <- normalizePath(file.path(".", "Test_projects", "Test4_AllOverallAggregations_snow"))
+    dir_prj <- normalizePath(file.path(".", "Test_projects", "Test5_AllOverallAggregations_mpi"))
     setwd(dir_prj)
   }
 

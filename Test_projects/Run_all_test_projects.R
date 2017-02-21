@@ -134,7 +134,6 @@ if (any(which_tests_torun > 0)) {
   lapply(tests, delete_test_output)
 }
 
-
 setwd(dir.old)
 print(paste0(Sys.time(), ": end of SWSF test projects"))
 
