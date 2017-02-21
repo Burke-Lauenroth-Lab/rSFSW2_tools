@@ -12,7 +12,7 @@ execute these test projects and compare against reference databases.
 
 2. Run test projects
     * __Non-interactive__ use
-        - 
+        -
                 cd rSWSFtools/
                 ./Test_projects/Run_all_test_projects.R --help
 
@@ -24,9 +24,9 @@ execute these test projects and compare against reference databases.
             - Clean up `./Test_projects/Run_all_test_projects.R -t=0`
 
     * __Interactive__ use
-    
+
         - Start R
-        
+
         -
                 setwd("rSWSFtools/") # Set working directory
                 source("Test_projects/Run_all_test_projects.R")
@@ -50,10 +50,6 @@ execute these test projects and compare against reference databases.
                     ...
                 Which of the 6 tests should be run ('all'; a single number; several numbers separated by commas; zero or a negative number to delete any temporary objects):
 
-        - If the folder 'SoilWat_R_Wrapper' cannot be located
-
-                Enter path to folder of 'SoilWat_R_Wrapper':
-
 
 3. Check the outcomes
     - If the output does not compare favorably with the reference database, then a
@@ -64,4 +60,5 @@ execute these test projects and compare against reference databases.
 
 
 ## Feedback
-Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/issues) and offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/pulls)
+Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/issues) and
+offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/pulls)
