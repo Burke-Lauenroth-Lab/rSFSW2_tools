@@ -1,19 +1,28 @@
-# Tools to support the development of [SWSF](https://github.com/Burke-Lauenroth-Lab/SoilWat_R_Wrapper)
+# Tools to support the development of [rSFSW2](https://github.com/Burke-Lauenroth-Lab/rSFSW2)
+
+## Note: repository renamed from rSWSFtools to rSFSW2_tools on Feb 23, 2017
+
+All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
+
+Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
+```
+git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools.git
+```
+
 
 ## Test Projects
-Complete SWSF projects configured to test different functionality. Code is available to
+Complete rSFSW2 projects configured to test different functionality. Code is available to
 execute these test projects and compare against reference databases.
 
 1. Required setup
-    - Folder structure of git clones with adequate branches checked out on both
-        - ./SoilWat_R_Wrapper
-        - ./rSWSFtools
+    - Folder structure of git clones with adequate branches checked out for
+        - ./rSFSW2_tools
     - If needed adjust `dir.external`, i.e., path to external datasets in p1 of test projects
 
 2. Run test projects
     * __Non-interactive__ use
         -
-                cd rSWSFtools/
+                cd rSFSW2_tools/
                 ./Test_projects/Run_all_test_projects.R --help
 
         - Examples
@@ -28,7 +37,7 @@ execute these test projects and compare against reference databases.
         - Start R
 
         -
-                setwd("rSWSFtools/") # Set working directory
+                setwd("rSFSW2_tools/") # Set working directory
                 source("Test_projects/Run_all_test_projects.R")
 
         - If the folder 'Test_projects' is not on the current path, then enter on the command prompt
