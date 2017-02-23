@@ -18,8 +18,8 @@ execute these test projects and compare against reference databases.
 
 1. Required setup
     - Folder structure of git clones with adequate branches checked out on both
-        - ./SoilWat_R_Wrapper
-        - ./rSWSFtools
+        - ./rSFSW2
+        - ./rSFSW2_tools
     - If needed adjust `dir.external`, i.e., path to external datasets in p1 of test projects
 
 2. Run test projects
@@ -76,4 +76,4 @@ execute these test projects and compare against reference databases.
 
 
 ## Feedback
-Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/issues) and offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/pulls)
+Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/issues) and offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/pulls)
