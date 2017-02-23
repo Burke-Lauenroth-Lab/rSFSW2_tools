@@ -4,13 +4,11 @@
 
 All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
 
-Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e., 
+Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
 ```
 git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools.git
 ```
 
-If using GitHub Desktop you may want to remove existing clones, update the local clones via command line, re-start GitHub Desktop and add
-a new clone of the updated repository.
 
 ## Test Projects
 Complete SWSF projects configured to test different functionality. Code is available to
@@ -24,7 +22,7 @@ execute these test projects and compare against reference databases.
 
 2. Run test projects
     * __Non-interactive__ use
-        - 
+        -
                 cd rSFSW2_tools/
                 ./Test_projects/Run_all_test_projects.R --help
 
@@ -36,9 +34,9 @@ execute these test projects and compare against reference databases.
             - Clean up `./Test_projects/Run_all_test_projects.R -t=0`
 
     * __Interactive__ use
-    
+
         - Start R
-        
+
         -
                 setwd("rSFSW2_tools/") # Set working directory
                 source("Test_projects/Run_all_test_projects.R")
