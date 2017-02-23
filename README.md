@@ -25,7 +25,7 @@ execute these test projects and compare against reference databases.
 2. Run test projects
     * __Non-interactive__ use
         - 
-                cd rSWSFtools/
+                cd rSFSW2_tools/
                 ./Test_projects/Run_all_test_projects.R --help
 
         - Examples
@@ -40,7 +40,7 @@ execute these test projects and compare against reference databases.
         - Start R
         
         -
-                setwd("rSWSFtools/") # Set working directory
+                setwd("rSFSW2_tools/") # Set working directory
                 source("Test_projects/Run_all_test_projects.R")
 
         - If the folder 'Test_projects' is not on the current path, then enter on the command prompt
