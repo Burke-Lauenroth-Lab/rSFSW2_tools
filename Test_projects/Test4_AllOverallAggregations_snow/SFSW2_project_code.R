@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript
 
 #----------------------------------------------------------------------------------------#
-# rSWSF: FRAMEWORK FOR SOILWAT2 SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING
+# rSFSW2: FRAMEWORK FOR SOILWAT2 SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING
 #        SIMULATIONS, AND AGGREGATING OUTPUTS
 
 #----- LICENSE
-#    Copyright (C) 2017 by `r packageDescription("Rsoilwat31")[["Author"]]`
-#    Contact information `r packageDescription("Rsoilwat31")[["Maintainer"]]`
+#    Copyright (C) 2017 by `r packageDescription("rSFSW2")[["Author"]]`
+#    Contact information `r packageDescription("rSFSW2")[["Maintainer"]]`
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,15 +19,15 @@
 #    GNU General Public License for more details.
 
 #------ NOTES:
-#  - You get an overview by: `r package?rSWSF`
-#  - An index of functionality is displayed by: `r help(package = "rSWSF")`
+#  - You get an overview by: `r package?rSFSW2`
+#  - An index of functionality is displayed by: `r help(package = "rSFSW2")`
 #----------------------------------------------------------------------------------------#
 
 
 ##############################################################################
 t_job_start <- Sys.time()
 
-library("rSWSF")
+library("rSFSW2")
 
 #------ Turn on/off actions to be carried out by simulation framework
 actions <- list(
@@ -44,7 +44,7 @@ actions <- list(
   # Simulation runs
   # "sim_create", "sim_execute", and "sim_aggregate" can be used individually if
   # "saveRsoilwatInput" and/or "saveRsoilwatOutput" are true
-  #   - Prepare/collect inputs for a Rsoilwat run (formerly, 'create')
+  #   - Prepare/collect inputs for a rSOILWAT2 run (formerly, 'create')
   sim_create = TRUE,
   #   - Execute SOILWAT2 simulations (formerly 'execute')
   sim_execute = TRUE,
@@ -68,46 +68,46 @@ actions <- list(
 ##############################################################################
 #------ 1) CREATE A NEW SIMULATION PROJECT (DO ONCE) -------------------------
 
-dir_prj <- "SWSF_default_project"
+dir_prj <- "SFSW2_default_project"
 
 if (TRUE) {
   # If this is a test project:
-  #   * if interactive: current working directory must be rSWSFtools/
+  #   * if interactive: current working directory must be rSFSW2_tools/
   #   * if !interactive: current working directory must be folder of test projects,
-  #       * e.g., rSWSFtools/Test_projects/Test4_AllOverallAggregations
+  #       * e.g., rSFSW2_tools/Test_projects/Test4_AllOverallAggregations
   if (interactive()) {
-    dir_prj <- normalizePath(file.path(".", "Test_projects", "Test5_AllOverallAggregations_mpi"))
+    dir_prj <- normalizePath(file.path(".", "Test_projects", "Test4_AllOverallAggregations_snow"))
     setwd(dir_prj)
   }
 
   dir_prj <- getwd()
 }
 
-fmeta <- file.path(dir_prj, "SWSF_project_descriptions.rds")
-fmetar <- file.path(dir_prj, "SWSF_project_descriptions.R")
+fmeta <- file.path(dir_prj, "SFSW2_project_descriptions.rds")
+fmetar <- file.path(dir_prj, "SFSW2_project_descriptions.R")
 
 if (file.exists(fmeta)) {
 
   # Load pre-prepared project description if it was setup previously
-  SWSF_prj_meta <- readRDS(fmeta)
+  SFSW2_prj_meta <- readRDS(fmeta)
 
 } else {
 
   # 1a) Setup default project infrastructure
-  setup_rSWSF_project_infrastructure(dir_prj)
+  setup_rSFSW2_project_infrastructure(dir_prj)
 
-  # 1b) In text editor: specify project description/metadata ("SWSF_project_description.R")
-  warning("'SWSF_project_code.R': Check/adjust project description/metadata in file ",
+  # 1b) In text editor: specify project description/metadata ("SFSW2_project_description.R")
+  warning("'SFSW2_project_code.R': Check/adjust project description/metadata in file ",
     shQuote(basename(fmetar)), " before further steps are executed.", call. = FALSE,
     immediate. = TRUE)
 
   # 1c) Load and prepare project description
-  SWSF_prj_meta <- new.env(parent = baseenv())
-  sys.source(fmetar, envir = SWSF_prj_meta, keep.source = FALSE)
+  SFSW2_prj_meta <- new.env(parent = baseenv())
+  sys.source(fmetar, envir = SFSW2_prj_meta, keep.source = FALSE)
 
-  SWSF_prj_meta <- init_rSWSF_project(SWSF_prj_meta, fmeta)
+  SFSW2_prj_meta <- init_rSFSW2_project(SFSW2_prj_meta, fmeta)
 
-  saveRDS(SWSF_prj_meta, file = fmeta)
+  saveRDS(SFSW2_prj_meta, file = fmeta)
 }
 
 
@@ -116,11 +116,11 @@ if (file.exists(fmeta)) {
 #------ 2) LOAD SETTINGS FOR THIS RUN ----------------------------------------
 # Setting objects:
 #   opt_behave, opt_parallel, opt_verbosity, opt_out_run, opt_chunks
-source(file.path(dir_prj, "SWSF_project_settings.R"), verbose = FALSE,
+source(file.path(dir_prj, "SFSW2_project_settings.R"), verbose = FALSE,
   keep.source = FALSE)
 
 #--- Set up infrastructure for parallel framework runs
-opt_parallel <- init_SWSF_cluster(opt_parallel)
+opt_parallel <- init_SFSW2_cluster(opt_parallel)
 
 
 
@@ -129,14 +129,14 @@ opt_parallel <- init_SWSF_cluster(opt_parallel)
 
 if (actions[["prep_inputs"]]) {
 
-  temp <- populate_rSWSF_project_with_data(SWSF_prj_meta, opt_behave, opt_parallel,
+  temp <- populate_rSFSW2_project_with_data(SFSW2_prj_meta, opt_behave, opt_parallel,
     opt_chunks, opt_out_run, opt_verbosity)
 
-  SWSF_prj_meta <- temp[["SWSF_prj_meta"]]
-  SWSF_prj_inputs <- temp[["SWSF_prj_inputs"]]
+  SFSW2_prj_meta <- temp[["SFSW2_prj_meta"]]
+  SFSW2_prj_inputs <- temp[["SFSW2_prj_inputs"]]
 
-  warning("'SWSF_project_code.R': Modify/reset input tracker status ",
-    "'SWSF_prj_meta[['input_status']]', if needed, manually or by calling function ",
+  warning("'SFSW2_project_code.R': Modify/reset input tracker status ",
+    "'SFSW2_prj_meta[['input_status']]', if needed, manually or by calling function ",
     "'update_intracker' and re-run project.", call. = FALSE, immediate. = TRUE)
 }
 
@@ -147,13 +147,13 @@ if (actions[["prep_inputs"]]) {
 
 if (actions[["check_inputs"]]) {
 
-  temp <- check_rSWSF_project_input_data(SWSF_prj_meta, SWSF_prj_inputs, opt_verbosity)
+  temp <- check_rSFSW2_project_input_data(SFSW2_prj_meta, SFSW2_prj_inputs, opt_verbosity)
 
-  SWSF_prj_meta <- temp[["SWSF_prj_meta"]]
-  SWSF_prj_inputs <- temp[["SWSF_prj_inputs"]]
+  SFSW2_prj_meta <- temp[["SFSW2_prj_meta"]]
+  SFSW2_prj_inputs <- temp[["SFSW2_prj_inputs"]]
 
-  warning("'SWSF_project_code.R': Modify/reset input tracker status ",
-    "'SWSF_prj_meta[['input_status']]', if needed, manually or by calling function ",
+  warning("'SFSW2_project_code.R': Modify/reset input tracker status ",
+    "'SFSW2_prj_meta[['input_status']]', if needed, manually or by calling function ",
     "'update_intracker' and re-run project.", call. = FALSE, immediate. = TRUE)
 }
 
@@ -164,7 +164,7 @@ if (actions[["check_inputs"]]) {
 
 if (any(unlist(actions[c("sim_create", "sim_execute", "sim_aggregate", "concat_dbOut")]))) {
 
-  SWSF_prj_meta <- simulate_SOILWAT2_experiment(actions, SWSF_prj_meta, SWSF_prj_inputs,
+  SFSW2_prj_meta <- simulate_SOILWAT2_experiment(actions, SFSW2_prj_meta, SFSW2_prj_inputs,
     t_job_start, opt_behave, opt_parallel, opt_chunks, opt_out_run, opt_verbosity)
 }
 
@@ -175,7 +175,7 @@ if (any(unlist(actions[c("sim_create", "sim_execute", "sim_aggregate", "concat_d
 
 if (actions[["ensemble"]]) {
 
-  generate_ensembles(SWSF_prj_meta, t_job_start, opt_parallel, opt_chunks,
+  generate_ensembles(SFSW2_prj_meta, t_job_start, opt_parallel, opt_chunks,
     verbose = opt_verbosity[["verbose"]])
 }
 
@@ -186,7 +186,7 @@ if (actions[["ensemble"]]) {
 
 if (actions[["check_dbOut"]]) {
 
-  check_outputDB_completeness(SWSF_prj_meta, opt_parallel, opt_behave,
+  check_outputDB_completeness(SFSW2_prj_meta, opt_parallel, opt_behave,
     opt_out_run, verbose = opt_verbosity[["verbose"]])
 }
 

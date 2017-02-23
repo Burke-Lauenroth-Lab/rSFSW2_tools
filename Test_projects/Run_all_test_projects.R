@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-print(paste0(Sys.time(), ": running 'rSWSFtools' test projects"))
+print(paste0(Sys.time(), ": running 'rSFSW2_tools' test projects"))
 dir.old <- getwd()
 
 
@@ -41,10 +41,10 @@ if (!interactive()) {
 
 
 #---Interactive user input
-# Current working directory must be a subfolder of 'rSWSFtools' or itself
-dir.test <- if (grepl("rSWSFtools", dir.old)) {
+# Current working directory must be a subfolder of 'rSFSW2_tools' or itself
+dir.test <- if (grepl("rSFSW2_tools", dir.old)) {
     temp <- strsplit(dir.old, .Platform$file.sep, fixed = TRUE)[[1]]
-    temp <- do.call("file.path", as.list(temp[seq_len(which(temp == "rSWSFtools"))]))
+    temp <- do.call("file.path", as.list(temp[seq_len(which(temp == "rSFSW2_tools"))]))
     file.path(temp, "Test_projects")
 
   } else {
@@ -117,7 +117,7 @@ which_tests_torun <- if (!is.na(temp)) {
 
 
 #---Load functions
-library("rSWSF")
+library("rSFSW2")
 
 cat("\n")
 source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
@@ -130,11 +130,11 @@ if (any(which_tests_torun > 0)) {
   print(out)
 
 } else if (which_tests_torun < 1) {
-  print(paste0(Sys.time(), ": delete temporary disk files of SWSF test projects"))
+  print(paste0(Sys.time(), ": delete temporary disk files of rSFSW2 test projects"))
   lapply(tests, delete_test_output)
 }
 
 setwd(dir.old)
-print(paste0(Sys.time(), ": end of SWSF test projects"))
+print(paste0(Sys.time(), ": end of rSFSW2 test projects"))
 
 warnings()

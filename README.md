@@ -1,6 +1,6 @@
 # Tools to support the development of [rSFSW2](https://github.com/Burke-Lauenroth-Lab/rSFSW2)
 
-## Note: repository renamed from rSWSFtools to rSFSW2_tools on Feb 23, 2017
+## Note: repository renamed from rSFSW2_tools to rSFSW2_tools on Feb 23, 2017
 
 All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
 
@@ -69,5 +69,5 @@ execute these test projects and compare against reference databases.
 
 
 ## Feedback
-Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/issues) and
-offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSWSFtools/pulls)
+Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/issues) and
+offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/pulls)

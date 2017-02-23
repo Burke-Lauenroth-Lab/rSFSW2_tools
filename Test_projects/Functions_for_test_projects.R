@@ -41,7 +41,7 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
       it <- which_tests_torun[k]
       print(paste0(Sys.time(), ": running test project '", basename(dir_tests[it]), "'"))
 
-      test_code <- list.files(dir_tests[it], pattern = "SWSF_project_code.R")
+      test_code <- list.files(dir_tests[it], pattern = "project_code")
       problems2 <- list()
 
       if (length(test_code) == 1L) {
@@ -127,14 +127,14 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
 #'
 #' @param dir_test A character string. Path to test project folder.
 #' @param dir_ref A character string. Path to folder with reference database.
-#' @param SWSF_version A character string. The version ID of the simulation framework as
+#' @param SFSW2_version A character string. The version ID of the simulation framework as
 #'  reported by the file \code{DESCRIPTION}.
 #'
 #' @return A logical value. \code{TRUE} if successful.
-make_test_output_reference <- function(dir_test, dir_ref = NULL, SWSF_version = NULL) {
+make_test_output_reference <- function(dir_test, dir_ref = NULL, SFSW2_version = NULL) {
 
-  if (is.null(SWSF_version)) {
-    SWSF_version <- packageVersion("rSWSF")
+  if (is.null(SFSW2_version)) {
+    SFSW2_version <- packageVersion("rSFSW2")
   }
 
 	if (is.null(dir_ref))
@@ -144,7 +144,7 @@ make_test_output_reference <- function(dir_test, dir_ref = NULL, SWSF_version = 
 
   fdb <- file.path(dir_test, "4_Data_SWOutputAggregated", "dbTables.sqlite3")
   if (file.exists(fdb)) {
-    fdb_ref <- paste0("dbTables_", basename(dir_test), "_v", SWSF_version, ".sqlite3")
+    fdb_ref <- paste0("dbTables_", basename(dir_test), "_v", SFSW2_version, ".sqlite3")
     res <- file.rename(fdb, file.path(dir_ref, fdb_ref))
 
   } else {
@@ -165,7 +165,7 @@ delete_test_output <- function(dir_test) {
     list.files(dir_test, pattern = ".Rapp.history", recursive = TRUE, full.names = TRUE),
     list.files(dir_test, pattern = "ClimDB_failedLocations_", recursive = TRUE,
       full.names = TRUE),
-    file.path(dir_test, "SWSF_project_descriptions.rds"),
+    file.path(dir_test, "SFSW2_project_descriptions.rds"),
     file.path(dir_test, "1_Data_SWInput", "dbWeatherData_test.sqlite3"),
     file.path(dir_test, "1_Data_SWInput", "SWRuns_InputAll_PreProcessed.rds"))
 

@@ -1,22 +1,22 @@
 #----------------------------------------------------------------------------------------#
-# rSWSF: FRAMEWORK FOR SOILWAT2 SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING
+# rSFSW2: FRAMEWORK FOR SOILWAT2 SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING
 #        SIMULATIONS, AND AGGREGATING OUTPUTS
 #
-# See demo/SWSF_project_code.R for details
+# See demo/SFSW2_project_code.R for details
 #----------------------------------------------------------------------------------------#
 
 
 ##############################################################################
 #----------------------- DESCRIPTION OF SIMULATION PROJECT ---------------------
 
-# NOTE: The values cannot be changed once a SWSF simulation project is set up. The
-#  values of settings (file demo/SWSF_project_settings.R) may be changed from run to run.
+# NOTE: The values cannot be changed once a rSFSW2 simulation project is set up. The
+#  values of settings (file demo/SFSW2_project_settings.R) may be changed from run to run.
 
 
 #------ Paths to simulation framework project folders
 project_paths <- list(
   dir_prj = dir_prj <- {# path to simulation project
-    temp <- file.path(".", "Test_projects", "Test3_OnlyMeanDailyOutput")
+    temp <- file.path(".", "Test_projects", "Test4_AllOverallAggregations_snow")
 
     if (dir.exists(temp)) {
       if (interactive()) setwd(temp)
@@ -40,12 +40,12 @@ project_paths <- list(
 
   # Path to where large outputs are saved to disk
   dir_big = dir_big <- dir_prj,
-  # Path to where Rsoilwat objects are saved to disk
+  # Path to where rSOILWAT2 objects are saved to disk
   #   if saveRsoilwatInput and/or saveRsoilwatOutput
   dir_out_sw = file.path(dir_big, "3_Runs"),
-  # Path to outputs produced by rSWSF
+  # Path to outputs produced by rSFSW2
   dir_out = dir_out <- file.path(dir_big, "4_Data_SWOutputAggregated"),
-  # Path to where rSWSF will store temporary files
+  # Path to where rSFSW2 will store temporary files
   dir_out_temp = file.path(dir_out, "temp"),
   # Path to various other output
   dir_out_expDesign = file.path(dir_out, "Experimentals_Input_Data"),
@@ -123,7 +123,7 @@ opt_input <- list(
   # Interpolate and add soil layers if not available if 'AddRequestedSoilLayers'
   requested_soil_layers = c(5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150),
 
-  # Request data from datasets ('external' to a rSWSF-project)
+  # Request data from datasets ('external' to a rSFSW2-project)
   req_data = c(
       # Daily weather data for current conditions
       "GriddedDailyWeatherFromMaurer2002_NorthAmerica", 0,  # 1/8-degree resolution
@@ -313,9 +313,7 @@ req_scens <- list(
   #   If climate datafiles used, then in the order of data in the those datafiles
   # This is a list of all GCMs for CMIP5 provided by GDO-DCP-UC-LLNL: 37 RCP4.5, 35 RCP8.5
   #   Excluded: 'HadCM3' and 'MIROC4h' because data only available until 2035
-  models = c(
-    "RCP45.CanESM2", "RCP45.CESM1-CAM5", "RCP45.HadGEM2-CC",
-    "RCP85.CanESM2", "RCP85.CESM1-CAM5", "RCP85.HadGEM2-CC"),
+  models = c(),
 
   sources = c(
     # For each climate data set from which to extract, add an element like 'dataset1'
@@ -415,87 +413,87 @@ req_out <- list(
   # Overall aggregated output table
   overall_out = c(
   #---Aggregation: SOILWAT2 inputs
-    "input_SoilProfile", 0,
-    "input_FractionVegetationComposition", 0,
-    "input_VegetationBiomassMonthly", 0,
-    "input_VegetationPeak", 0,
-    "input_Phenology", 0,
-    "input_TranspirationCoeff", 0,
-    "input_ClimatePerturbations", 0,
+    "input_SoilProfile", 1,
+    "input_FractionVegetationComposition", 1,
+    "input_VegetationBiomassMonthly", 1,
+    "input_VegetationPeak", 1,
+    "input_Phenology", 1,
+    "input_TranspirationCoeff", 1,
+    "input_ClimatePerturbations", 1,
   #---Aggregation: Climate and weather
-    "yearlyTemp", 0,
-    "yearlyPPT", 0,
-    "dailySnowpack", 0,
-    "dailyFrostInSnowfreePeriod", 0,
-    "dailyHotDays", 0,
-    "dailyWarmDays", 0,
-    "dailyPrecipitationEventSizeDistribution", 0,
-    "yearlyPET", 0,
-    "monthlySeasonalityIndices", 0,
+    "yearlyTemp", 1,
+    "yearlyPPT", 1,
+    "dailySnowpack", 1,
+    "dailyFrostInSnowfreePeriod", 1,
+    "dailyHotDays", 1,
+    "dailyWarmDays", 1,
+    "dailyPrecipitationEventSizeDistribution", 1,
+    "yearlyPET", 1,
+    "monthlySeasonalityIndices", 1,
   #---Aggregation: Climatic dryness
-    "yearlymonthlyTemperateDrylandIndices", 0,
-    "yearlyDryWetPeriods", 0,
-    "dailyWeatherGeneratorCharacteristics", 0,
-    "dailyPrecipitationFreeEventDistribution", 0,
-    "monthlySPEIEvents", 0,
+    "yearlymonthlyTemperateDrylandIndices", 1,
+    "yearlyDryWetPeriods", 1,
+    "dailyWeatherGeneratorCharacteristics", 1,
+    "dailyPrecipitationFreeEventDistribution", 1,
+    "monthlySPEIEvents", 1,
   #---Aggregation: Climatic control
-    "monthlyPlantGrowthControls", 0,
-    "dailyC4_TempVar", 0,
-    "dailyDegreeDays", 0,
+    "monthlyPlantGrowthControls", 1,
+    "dailyC4_TempVar", 1,
+    "dailyDegreeDays", 1,
   #---Aggregation: Yearly water balance
-    "yearlyAET", 0,
-    "yearlyWaterBalanceFluxes", 0,
-    "dailySoilWaterPulseVsStorage", 0,
+    "yearlyAET", 1,
+    "yearlyWaterBalanceFluxes", 1,
+    "dailySoilWaterPulseVsStorage", 1,
   #---Aggregation: Daily extreme values
-    "dailyTranspirationExtremes", 0,
-    "dailyTotalEvaporationExtremes", 0,
-    "dailyDrainageExtremes", 0,
-    "dailyInfiltrationExtremes", 0,
-    "dailyAETExtremes", 0,
-    "dailySWPextremes", 0,
-    "dailyRechargeExtremes", 0,
+    "dailyTranspirationExtremes", 1,
+    "dailyTotalEvaporationExtremes", 1,
+    "dailyDrainageExtremes", 1,
+    "dailyInfiltrationExtremes", 1,
+    "dailyAETExtremes", 1,
+    "dailySWPextremes", 1,
+    "dailyRechargeExtremes", 1,
   #---Aggregation: Ecological dryness
     # Note: 'dailyNRCS_SoilMoistureTemperatureRegimes*' require at least soil layers at
     #   10, 20, 30, 50, 60, 90 cm
-    "dailyNRCS_SoilMoistureTemperatureRegimes_Intermediates", 0,
-    "dailyNRCS_SoilMoistureTemperatureRegimes", 0,
-    "dailyNRCS_Chambers2014_ResilienceResistance", 0,
-    "dailyNRCS_Maestas2016_ResilienceResistance", 0,
-    "dailyWetDegreeDays", 0,
-    "dailyThermalDrynessStartEnd", 0,
-    "dailyThermalSWPConditionCount", 0,
-    "monthlySWPdryness", 0,
-    "dailySWPdrynessANDwetness", 0,
-    "dailySuitablePeriodsDuration", 0,
-    "dailySuitablePeriodsAvailableWater", 0,
-    "dailySuitablePeriodsDrySpells", 0,
-    "dailySWPdrynessDurationDistribution", 0,
-    "dailySWPdrynessEventSizeDistribution", 0,
-    "dailySWPdrynessIntensity", 0,
-    "dailyThermalDrynessStress", 0,
+    "dailyNRCS_SoilMoistureTemperatureRegimes_Intermediates", 1,
+    "dailyNRCS_SoilMoistureTemperatureRegimes", 1,
+    "dailyNRCS_Chambers2014_ResilienceResistance", 1,
+    "dailyNRCS_Maestas2016_ResilienceResistance", 1,
+    "dailyWetDegreeDays", 1,
+    "dailyThermalDrynessStartEnd", 1,
+    "dailyThermalSWPConditionCount", 1,
+    "monthlySWPdryness", 1,
+    "dailySWPdrynessANDwetness", 1,
+    "dailySuitablePeriodsDuration", 1,
+    "dailySuitablePeriodsAvailableWater", 1,
+    "dailySuitablePeriodsDrySpells", 1,
+    "dailySWPdrynessDurationDistribution", 1,
+    "dailySWPdrynessEventSizeDistribution", 1,
+    "dailySWPdrynessIntensity", 1,
+    "dailyThermalDrynessStress", 1,
   #---Aggregation: Mean monthly values
-    "monthlyTemp", 0,
-    "monthlyPPT", 0,
-    "monthlySnowpack", 0,
-    "monthlySoilTemp", 0,
-    "monthlyRunoff", 0,
-    "monthlyHydraulicRedistribution", 0,
-    "monthlyInfiltration", 0,
-    "monthlyDeepDrainage", 0,
-    "monthlySWPmatric", 0,
-    "monthlyVWCbulk", 0,
-    "monthlyVWCmatric", 0,
-    "monthlySWCbulk", 0,
-    "monthlySWAbulk", 0,
-    "monthlyTranspiration", 0,
-    "monthlySoilEvaporation", 0,
-    "monthlyAET", 0,
-    "monthlyPET", 0,
-    "monthlyVPD", 0,
-    "monthlyAETratios", 0,
-    "monthlyPETratios", 0,
+    "monthlyTemp", 1,
+    "monthlyPPT", 1,
+    "monthlySnowpack", 1,
+    "monthlySoilTemp", 1,
+    "monthlyRunoff", 1,
+    "monthlyHydraulicRedistribution", 1,
+    "monthlyInfiltration", 1,
+    "monthlyDeepDrainage", 1,
+    "monthlySWPmatric", 1,
+    "monthlyVWCbulk", 1,
+    "monthlyVWCmatric", 1,
+    "monthlySWCbulk", 1,
+    "monthlySWAbulk", 1,
+    "monthlyTranspiration", 1,
+    "monthlySoilEvaporation", 1,
+    "monthlyAET", 1,
+    "monthlyPET", 1,
+    "monthlyVPD", 1,
+    "monthlyAETratios", 1,
+    "monthlyPETratios", 1,
   #---Aggregation: Potential regeneration
-    "dailyRegeneration_bySWPSnow", 0,
+    "dailyRegeneration_bySWPSnow", 1,
     "dailyRegeneration_GISSM", 1
   ),
 
@@ -505,12 +503,7 @@ req_out <- list(
   #   "SWPmatric", "Snowpack", "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss",
   #   "Runoff", "Infiltration", "DeepDrainage", "PET", "TotalPrecipitation",
   #   "TemperatureMin", "TemperatureMax", "SoilTemperature")
-  mean_daily = c("AET", "Transpiration", "EvaporationSoil", "EvaporationSurface",
-    "EvaporationTotal", "VWCbulk", "VWCmatric", "SWCbulk", "SWPmatric", "Snowpack",
-    "SWAbulk", "Rain", "Snowfall", "Snowmelt", "SnowLoss", "Runoff", "Infiltration",
-    "DeepDrainage", "PET", "TotalPrecipitation", "TemperatureMin", "TemperatureMax",
-    "SoilTemperature"),
-
+  mean_daily = NULL,
   # Select variables to output as aggregated yearly time series
   #  options: NULL or a selection of c("dailyRegeneration_GISSM")
   traces = NULL

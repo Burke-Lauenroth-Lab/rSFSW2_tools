@@ -69,15 +69,15 @@ url.Rrepos <- "https://cran.us.r-project.org"
 #------Set paths to simulation framework folders
 #parent folder of simulation project
 # for test projects:
-#	if interactive: current working directory must be SoilWat_R_Wrapper/
+#	if interactive: current working directory must be rSFSW2/
 #	if !interactive: current working directory must be folder of test projects,
-#		e.g., SoilWat_R_Wrapper/tests/Test_projects/Test4_AllOverallAggregations
+#		e.g., rSFSW2/tests/Test_projects/Test4_AllOverallAggregations
 if(interactive()) {
 	dir.prj <- normalizePath(file.path(".", "Test_projects", "Test2_LookupWeatherFolders"))
 	setwd(dir.prj)
 }
 dir.prj <- dir.big <- getwd()
-dir.code <- normalizePath(file.path("..", "..", "..", "SoilWat_R_Wrapper")) # "github/SoilWat_R_Wrapper/"
+dir.code <- normalizePath(file.path("..", "..", "..", "rSFSW2")) # "github/rSFSW2/"
 
 #parent folder containing external data
 #drs dir.external <- "/Volumes/YOURBIGDATA/BigData/GIS/Data"
@@ -133,11 +133,11 @@ map_vars <- c("ELEV_m", "SoilDepth", "Matricd", "GravelContent", "Sand", "Clay",
 check.blas <- FALSE
 
 #---Load functions (don't forget the C functions!)
-rSWSF <- file.path(dir.code, "R", "2_SWSF_p5of5_Functions_v51.RData")
-if (!file.exists(rSWSF) || !continueAfterAbort) {
-  exclude_from_R <- c("2_SWSF_p2of5_CreateDB_Tables_v51.R",
-    "2_SWSF_p3of5_ExternalDataExtractions_v51.R", "2_SWSF_p4of5_Code_v51.R",
-    "Check_WeatherDatabase.R", "SWSF_cpp_functions.R")
+rSFSW2 <- file.path(dir.code, "R", "2_SFSW2_p5of5_Functions_v51.RData")
+if (!file.exists(rSFSW2) || !continueAfterAbort) {
+  exclude_from_R <- c("2_SFSW2_p2of5_CreateDB_Tables_v51.R",
+    "2_SFSW2_p3of5_ExternalDataExtractions_v51.R", "2_SFSW2_p4of5_Code_v51.R",
+    "Check_WeatherDatabase.R", "SFSW2_cpp_functions.R")
   temp <- list.files(file.path(dir.code, "R"), pattern = ".r", ignore.case = TRUE,
     full.names = TRUE)
   ntemp <- nchar(temp)
@@ -145,16 +145,16 @@ if (!file.exists(rSWSF) || !continueAfterAbort) {
     function(i) substr(temp[i], ntemp[i] - 1L, ntemp[i])))
   load_from_R <- temp[!(basename(temp) %in% exclude_from_R) & temp_ext == ".r"]
 
-  swsf_funs <- attach(NULL, name = "swsf_funs")
+  SFSW2_funs <- attach(NULL, name = "SFSW2_funs")
   if (length(load_from_R)) for (rfile in load_from_R) {
-    sys.source(rfile, envir = swsf_funs, keep.source = FALSE)
+    sys.source(rfile, envir = SFSW2_funs, keep.source = FALSE)
   }
-  save(list = ls(name = "swsf_funs"), file = rSWSF)
+  save(list = ls(name = "SFSW2_funs"), file = rSFSW2)
 
-  detach("swsf_funs")
-  rm(swsf_funs)
+  detach("SFSW2_funs")
+  rm(SFSW2_funs)
 }
-load(rSWSF)
+load(rSFSW2)
 print("The following warning can be safely ignored: ''package:stats' may not be available when loading'. It will disappear once the wrapper has been transformed to a package")
 
 
@@ -549,4 +549,4 @@ if(any(actions == "create") || any(actions == "execute") || any(actions == "aggr
 
 # for test projects:
 #if (!interactive())
-  source(file.path(dir.code, "R", "2_SWSF_p4of5_Code_v51.R"), verbose = FALSE, chdir = FALSE)
+  source(file.path(dir.code, "R", "2_SFSW2_p4of5_Code_v51.R"), verbose = FALSE, chdir = FALSE)

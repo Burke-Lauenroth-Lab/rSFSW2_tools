@@ -1,17 +1,17 @@
 #----------------------------------------------------------------------------------------#
-# rSWSF: FRAMEWORK FOR SOILWAT2 SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING
+# rSFSW2: FRAMEWORK FOR SOILWAT2 SIMULATIONS: CREATING SIMULATION RUNS, EXECUTING
 #        SIMULATIONS, AND AGGREGATING OUTPUTS
 #
-# See demo/SWSF_project_code.R for details
+# See demo/SFSW2_project_code.R for details
 #----------------------------------------------------------------------------------------#
 
 
 ##############################################################################
 #----------------------- SETTINGS FOR A RUN OF A SIMULATION PROJECT ----------
 
-# NOTE: The values may be changed/adjusted from run to run a SWSF simulation project. The
-#  values of the description of a project (file demo/SWSF_project_description.R) cannot
-#  be changed once a SWSF simulation project is set up.
+# NOTE: The values may be changed/adjusted from run to run a rSFSW2 simulation project. The
+#  values of the description of a project (file demo/SFSW2_project_description.R) cannot
+#  be changed once a rSFSW2 simulation project is set up.
 
 
 
@@ -41,13 +41,13 @@ opt_parallel <- list(
   # Should job be run in parallel
   parallel_runs = !interactive(),
   # Number of cores/workers/slaves if job is run in parallel
-  num_cores = 4,
+  num_cores = 2,
   # Parallel_backend: "cluster" (via package 'parallel') or "mpi" (via 'Rmpi')
   parallel_backend = "cluster",
 
-  # Computation time requests: time limits are only enforced if is.finite(wall_time_s)
+  # Computation time requests: time limits are only enforced if parallel_backend == "mpi"
   opt_job_time = list(
-    wall_time_s = Inf, # requested wall time
+    wall_time_s = 12 * 3600, # requested wall time
     one_sim_s = 60, # time needed to complete one call to do_OneSite()
     one_concat_s = 60 # time needed to process one temporary SQL file
   )
@@ -68,7 +68,7 @@ opt_verbosity <- list(
   # Sets global option 'warn' for the duration of a simulation project
   #   Possible values: -1, 0, 1, 2; for details: ?options -> Value: warn
 #  debug.warn.level = 2 * interactive(),
-  debug.warn.level = 1, #TODO: remove
+  debug.warn.level = 1, #TODO: remove and use 2 * interactive()
   # Should R objects be dumped to disk on error (including for each call to 'do_OneSite')
   debug.dump.objects = interactive()
 )
@@ -76,9 +76,9 @@ opt_verbosity <- list(
 
 #------ Output options
 opt_out_run <- list(
-  # Write Rsoilwat input and output objects to disk for each SOILWAT2 simulation
-  saveRsoilwatInput = TRUE,
-  saveRsoilwatOutput = TRUE,
+  # Write rSOILWAT2 input and output objects to disk for each SOILWAT2 simulation
+  saveRsoilwatInput = FALSE,
+  saveRsoilwatOutput = FALSE,
 
   # Write data to big input files for experimental design x treatment design
   makeInputForExperimentalDesign = FALSE,
