@@ -163,6 +163,8 @@ delete_test_output <- function(dir_test) {
     list.files(dir_test, pattern = "last.dump", recursive = TRUE, full.names = TRUE),
     list.files(dir_test, pattern = ".log", recursive = TRUE, full.names = TRUE),
     list.files(dir_test, pattern = ".Rapp.history", recursive = TRUE, full.names = TRUE),
+    list.files(dir_test, pattern = "_olog_cluster.txt", recursive = TRUE,
+      full.names = TRUE),
     list.files(dir_test, pattern = "ClimDB_failedLocations_", recursive = TRUE,
       full.names = TRUE),
     file.path(dir_test, "SFSW2_project_descriptions.rds"),

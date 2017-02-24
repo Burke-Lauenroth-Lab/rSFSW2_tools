@@ -41,7 +41,7 @@ opt_parallel <- list(
   # Should job be run in parallel
   parallel_runs = !interactive(),
   # Number of cores/workers/slaves if job is run in parallel
-  num_cores = 2,
+  num_cores = 4,
   # Parallel_backend: "cluster" (via package 'parallel') or "mpi" (via 'Rmpi')
   parallel_backend = "cluster",
 
