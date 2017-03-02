@@ -48,8 +48,8 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
       if (length(test_code) == 1L) {
         setwd(if (interactive()) file.path(dir_test, "..") else dir_tests[it])
 
-        if (exists("SFSW2_prj_meta")) rm("SFSW2_prj_meta")
-        if (exists("fmeta")) rm("fmeta")
+        if (exists("SFSW2_prj_meta")) rm("SFSW2_prj_meta", inherits = TRUE)
+        if (exists("fmeta")) rm("fmeta", inherits = TRUE)
 
         ctime <- system.time(temp <- try(source(file.path(dir_tests[it], test_code),
           verbose = FALSE, chdir = FALSE)))
