@@ -102,7 +102,9 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
               SFSW2_prj_meta[["fnames_in"]][["fsoils"]])
           }
 
-          print(paste("Will delete input files:", paste0(basename(temp), collapse = ", ")))
+          if (!is.null(temp))
+            print(paste("Will delete input files:", paste0(basename(temp),
+              collapse = ", ")))
 
           tests_files_to_delete[[k]] <- temp
         }
