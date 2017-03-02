@@ -1,6 +1,6 @@
-"Label","site_id","WeatherFolder","X_WGS84","Y_WGS84","ELEV_m","Include_YN","dailyweather_source","Include_YN_DailyWeather","GCM_sources"
-"Site01",1,"Site01_data_35.8125_-106.3125",-106.29953,35.76555,1969,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA"
-"Site02",2,"Site02_data_35.8125_-106.3125",-106.27478,35.76451,1946,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA"
-"Site03",3,"Site03_data_35.8125_-106.3125",-106.28126,35.7799,1988,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA"
-"Site04",4,"NA",-106.28749,35.7953,NA,0,NA,0,NA
-"Site05",5,"Site05_data_35.8125_-106.3125",-106.28749,35.7953,2072,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA"
+"Label","site_id","WeatherFolder","X_WGS84","Y_WGS84","ELEV_m","Include_YN","dailyweather_source","Include_YN_DailyWeather","GCM_sources","SoilTexture_source","Include_YN_SoilSources","ClimateNormals_source","Include_YN_ClimateNormalSources","Include_YN_ClimateScenarioSources"
+"Site01",1,"Site01_data_35.8125_-106.3125",-106.29953,35.76555,1969,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA","ISRICWISEv12_Global",1,"ClimateNormals_NCDC2005_USA",1,1
+"Site02",2,"Site02_data_35.8125_-106.3125",-106.27478,35.76451,1946,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA","ISRICWISEv12_Global",1,"ClimateNormals_NCDC2005_USA",1,1
+"Site03",3,"Site03_data_35.8125_-106.3125",-106.28126,35.7799,1988,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA","ISRICWISEv12_Global",1,"ClimateNormals_NCDC2005_USA",1,1
+"Site04",4,"NA",-106.28749,35.7953,NA,0,"NA",0,"NA","NA",0,"NA",0,0
+"Site05",5,"Site05_data_35.8125_-106.3125",-106.28749,35.7953,2072,1,"Maurer2002_NorthAmerica",1,"CMIP5_BCSD_GDODCPUCLLNL_USA","ISRICWISEv12_Global",1,"ClimateNormals_NCDC2005_USA",1,1
