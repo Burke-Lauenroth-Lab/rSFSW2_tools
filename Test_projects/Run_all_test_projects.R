@@ -122,6 +122,7 @@ library("rSFSW2")
 cat("\n")
 source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
 
+#debug(run_test_projects)
 
 #---Run projects
 if (any(which_tests_torun > 0)) {
@@ -131,7 +132,9 @@ if (any(which_tests_torun > 0)) {
 
 } else if (which_tests_torun < 1) {
   print(paste0(Sys.time(), ": delete temporary disk files of rSFSW2 test projects"))
-  lapply(tests, delete_test_output)
+  out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
+    which_tests_torun = NULL, delete_output = FALSE, force_delete_output = TRUE,
+    make_new_ref = FALSE)
 }
 
 setwd(dir.old)

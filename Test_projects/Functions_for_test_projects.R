@@ -28,19 +28,20 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
   op_prev <- options(c("warn", "error"))
   on.exit(options(op_prev), add = TRUE)
 
-  tests_files_to_delete <- vector("list", length(dir_tests))
   problems <- list()
   fname_report <- "Test_project_report.txt"
   vars <- c("elapsed_s", "has_run", "has_problems", "made_new_refs", "deleted_output")
-  res <- data.frame(matrix(FALSE, nrow = length(which_tests_torun), ncol = length(vars),
-      dimnames = list(paste0("Test", which_tests_torun), vars)),
-    referenceDB = vector("character", length(which_tests_torun)),
-    stringsAsFactors = FALSE)
+  nruns <- length(which_tests_torun)
 
-  if (length(which_tests_torun) > 0) {
-    for (k in seq_along(which_tests_torun)) {
+  res <- data.frame(matrix(FALSE, nrow = nruns, ncol = length(vars),
+    dimnames = list(if (nruns > 0) paste0("Test", which_tests_torun), vars)),
+    referenceDB = vector("character", nruns), stringsAsFactors = FALSE)
+
+  if (nruns > 0 && all(which_tests_torun > 0)) {
+    for (k in seq_len(nruns)) {
       it <- which_tests_torun[k]
       print(paste0(Sys.time(), ": running test project '", basename(dir_tests[it]), "'"))
+      files_to_delete <- NULL
 
       test_code <- list.files(dir_tests[it], pattern = "project_code")
       problems2 <- list()
@@ -106,7 +107,7 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
             print(paste("Will delete input files:", paste0(basename(temp),
               collapse = ", ")))
 
-          tests_files_to_delete[[k]] <- temp
+          files_to_delete <- temp
         }
 
       } else {
@@ -132,38 +133,47 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
           (!make_new_ref || (make_new_ref && res[k, "made_new_refs"])))
 
       res[k, "deleted_output"] <- if (do_delete) {
-          delete_test_output(dir_tests[it],
-            path_to_files_to_delete = tests_files_to_delete[[k]])
+          delete_test_output(dir_tests[it], delete_filepaths = files_to_delete)
         } else {
           FALSE
         }
 
     } # end of for-loop along 'which_tests_torun'
+  } # end of if has tests to run
 
+  # Write report of problems to disk file
+  if (any(res[, "has_problems"])) {
+      if (delete_output && !force_delete_output)
+        print("Test output not be deleted because problems were detected.")
+      if (make_new_ref)
+        print("Test output not be used as future reference because problems were detected.")
 
-    # Write report of problems to disk file
-    if (any(res[, "has_problems"])) {
-        if (delete_output && !force_delete_output)
-          print("Test output not be deleted because problems were detected.")
-        if (make_new_ref)
-          print("Test output not be used as future reference because problems were detected.")
+      fname_report <- paste0(format(Sys.time(), "%Y%m%d-%H%M"), "_", fname_report)
+      print(paste("See problem report in file", shQuote(fname_report)))
 
-        fname_report <- paste0(format(Sys.time(), "%Y%m%d-%H%M"), "_", fname_report)
-        print(paste("See problem report in file", shQuote(fname_report)))
+      temp <- rep(names(problems), times = lengths(problems))
+      temp <- paste0(temp, ifelse(nchar(temp) > 0, ": ", ""))
+      temp <- paste0(temp, unlist(problems))
+      writeLines(temp, con = file.path(dir_test, fname_report))
+  }
 
-        temp <- rep(names(problems), times = lengths(problems))
-        temp <- paste0(temp, ifelse(nchar(temp) > 0, ": ", ""))
-        temp <- paste0(temp, unlist(problems))
-        writeLines(temp, con = file.path(dir_test, fname_report))
-    }
+  # Force delete if not already deleted (e.g., when delete all)
+  its_delete <- if (nruns > 0) which(!res[, "deleted_output"]) else seq_along(dir_tests)
 
-    # Force delete if not already deleted (e.g., when delete all)
-    if (force_delete_output) {
-      its_delete <- !res[, "deleted_output"]
-      res[its_delete, "deleted_output"] <- sapply(dir_tests[its_delete],
-        function(test) delete_test_output(test))
-    }
+  if (force_delete_output && length(its_delete) > 0) for (k in its_delete) {
 
+    ftemp <- file.path(dir_tests[k], "1_Data_SWInput",
+      "Test_referenceinputfiles_which_will_be_deleted")
+
+    delete_filepaths <- if (dir.exists(ftemp)) {
+        temp <- basename(list.files(ftemp))
+        temp <- unlist(lapply(temp, function(x) list.files(dir_tests[k], pattern = x,
+          full.names = TRUE, recursive = TRUE)))
+
+        temp[!grepl(basename(ftemp), temp)]
+      } else NULL
+
+    res[k, "deleted_output"] <- delete_test_output(dir_tests[k], delete_filepaths)
   }
 
   res
@@ -207,9 +217,9 @@ make_test_output_reference <- function(dir_test, dir_ref = NULL, SFSW2_version =
 
 
 #' Delete output of a test project
-delete_test_output <- function(dir_test, path_to_files_to_delete = NULL) {
+delete_test_output <- function(dir_test, delete_filepaths = NULL) {
   files_to_delete <- c(
-    path_to_files_to_delete,
+    delete_filepaths,
     list.files(dir_test, pattern = "last.dump", recursive = TRUE, full.names = TRUE),
     list.files(dir_test, pattern = ".log", recursive = TRUE, full.names = TRUE),
     list.files(dir_test, pattern = ".Rapp.history", recursive = TRUE, full.names = TRUE),
