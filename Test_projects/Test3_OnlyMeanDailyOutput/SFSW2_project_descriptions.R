@@ -496,7 +496,7 @@ req_out <- list(
     "monthlyPETratios", 0,
   #---Aggregation: Potential regeneration
     "dailyRegeneration_bySWPSnow", 0,
-    "dailyRegeneration_GISSM", 1
+    "dailyRegeneration_GISSM", 0
   ),
 
   # Select variables to aggregate daily means and stats::sd (one per day of year, DOY)
