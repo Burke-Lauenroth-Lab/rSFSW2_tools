@@ -3,8 +3,6 @@
 #' @param dir_test A character string. Path to overall test project folder.
 #' @param dir_tests A vector of character strings. Paths to individual test projects.
 #' @param dir_prev A character string. Paths to directory that should be set when function returns.
-#' @param dir_swsf A character string. Path to directory that is a clone of the
-#'  SoilWat_R_Wrapper repository.
 #' @param which_tests_torun An integer vector. Indices of \code{dir_tests} which will be
 #'  carried out.
 #' @param delete_output A logical value. If \code{TRUE} then output will be deleted unless
@@ -19,14 +17,13 @@
 #'  \code{has_problems}, \code{made_new_refs}, \code{deleted_output}, and one character
 #'  string \code{referenceDB} of the reference database name against which this run of
 #'  the test project was compared.
-run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = NULL,
-                              which_tests_torun = seq_along(dir_tests),
-                              delete_output = FALSE,
-                              force_delete_output = FALSE,
-                              make_new_ref = FALSE) {
+run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
+  which_tests_torun = seq_along(dir_tests), delete_output = FALSE,
+  force_delete_output = FALSE, make_new_ref = FALSE) {
 
   if (is.null(dir_prev))
     dir_prev <- getwd()
+
   on.exit(setwd(dir_prev))
   op_prev <- options(c("warn", "error"))
   on.exit(options(op_prev), add = TRUE)
@@ -34,21 +31,26 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
   problems <- list()
   fname_report <- "Test_project_report.txt"
   vars <- c("elapsed_s", "has_run", "has_problems", "made_new_refs", "deleted_output")
-  res <- data.frame(matrix(FALSE, nrow = length(which_tests_torun), ncol = length(vars),
-      dimnames = list(paste0("Test", which_tests_torun), vars)),
-    referenceDB = vector("character", length(which_tests_torun)),
-    stringsAsFactors = FALSE)
+  nruns <- length(which_tests_torun)
 
-  if (length(which_tests_torun) > 0) {
-    for (k in seq_along(which_tests_torun)) {
+  res <- data.frame(matrix(FALSE, nrow = nruns, ncol = length(vars),
+    dimnames = list(if (nruns > 0) paste0("Test", which_tests_torun), vars)),
+    referenceDB = vector("character", nruns), stringsAsFactors = FALSE)
+
+  if (nruns > 0 && all(which_tests_torun > 0)) {
+    for (k in seq_len(nruns)) {
       it <- which_tests_torun[k]
       print(paste0(Sys.time(), ": running test project '", basename(dir_tests[it]), "'"))
+      files_to_delete <- NULL
 
-      test_code <- list.files(dir_tests[it], pattern = "2_SWSF_p1of")
+      test_code <- list.files(dir_tests[it], pattern = "project_code")
       problems2 <- list()
 
       if (length(test_code) == 1L) {
         setwd(if (interactive()) file.path(dir_test, "..") else dir_tests[it])
+
+        if (exists("SFSW2_prj_meta")) rm("SFSW2_prj_meta", inherits = TRUE)
+        if (exists("fmeta")) rm("fmeta", inherits = TRUE)
 
         ctime <- system.time(temp <- try(source(file.path(dir_tests[it], test_code),
           verbose = FALSE, chdir = FALSE)))
@@ -73,6 +75,41 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
             paste("Source code for test project", shQuote(basename(dir_tests[it])), "unsuccessful."))
         }
 
+        # Determine data input files to be deleted
+        if (!exists("SFSW2_prj_meta")) {
+          if (exists("fmeta") && file.exists(fmeta)) {
+            SFSW2_prj_meta <- readRDS(fmeta)
+
+          } else {
+            fmeta <- file.path(dir_tests[it], "SFSW2_project_descriptions.rds")
+            if (file.exists(fmeta)) {
+              SFSW2_prj_meta <- readRDS(fmeta)
+            }
+          }
+        }
+
+        if (exists("SFSW2_prj_meta")) {
+          temp <- NULL
+          if (SFSW2_prj_meta[["exinfo"]][["ExtractSkyDataFromNOAAClimateAtlas_USA"]] ||
+            SFSW2_prj_meta[["exinfo"]][["ExtractSkyDataFromNCEPCFSR_Global"]]) {
+
+            temp <- c(temp, SFSW2_prj_meta[["fnames_in"]][["fclimnorm"]])
+          }
+
+          if (SFSW2_prj_meta[["exinfo"]][["ExtractSoilDataFromCONUSSOILFromSTATSGO_USA"]] ||
+            SFSW2_prj_meta[["exinfo"]][["ExtractSoilDataFromISRICWISEv12_Global"]]) {
+
+            temp <- c(temp, SFSW2_prj_meta[["fnames_in"]][["fslayers"]],
+              SFSW2_prj_meta[["fnames_in"]][["fsoils"]])
+          }
+
+          if (!is.null(temp))
+            print(paste("Will delete input files:", paste0(basename(temp),
+              collapse = ", ")))
+
+          files_to_delete <- temp
+        }
+
       } else {
           problems2 <- c(problems2,
             paste("Source code for test project", shQuote(basename(dir_tests[it])), "not found."))
@@ -82,42 +119,61 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
         res[k, "has_problems"] <- TRUE
         problems <- c(problems, problems2)
       }
-    }
 
+      # Make reference output
+      res[k, "made_new_refs"] <- if (make_new_ref && !(res[k, "has_problems"])) {
+          make_test_output_reference(dir_tests[it])
+        } else {
+          FALSE
+        }
 
-    if (any(res[, "has_problems"])) {
-        if (delete_output && !force_delete_output)
-          print("Test output will not be deleted because problems were detected.")
-        if (make_new_ref)
-          print("Test output will not be used as future reference because problems were detected.")
+      # Delete test project output
+      do_delete <- force_delete_output ||
+          (delete_output && !res[k, "has_problems"] &&
+          (!make_new_ref || (make_new_ref && res[k, "made_new_refs"])))
 
-        fname_report <- paste0(format(Sys.time(), "%Y%m%d-%H%M"), "_", fname_report)
-        print(paste("See problem report in file", shQuote(fname_report)))
+      res[k, "deleted_output"] <- if (do_delete) {
+          delete_test_output(dir_tests[it], delete_filepaths = files_to_delete)
+        } else {
+          FALSE
+        }
 
-        temp <- rep(names(problems), times = lengths(problems))
-        temp <- paste0(temp, ifelse(nchar(temp) > 0, ": ", ""))
-        temp <- paste0(temp, unlist(problems))
-        writeLines(temp, con = file.path(dir_test, fname_report))
-    }
+    } # end of for-loop along 'which_tests_torun'
+  } # end of if has tests to run
 
-    if (make_new_ref && !all(res[, "has_problems"])) {
-      res[, "made_new_refs"] <- sapply(dir_tests[which_tests_torun],
-        function(test) make_test_output_reference(test, dir_swsf = dir_swsf))
+  # Write report of problems to disk file
+  if (any(res[, "has_problems"])) {
+      if (delete_output && !force_delete_output)
+        print("Test output not be deleted because problems were detected.")
+      if (make_new_ref)
+        print("Test output not be used as future reference because problems were detected.")
 
-    } else {
-      res[, "made_new_refs"] <- FALSE
-    }
+      fname_report <- paste0(format(Sys.time(), "%Y%m%d-%H%M"), "_", fname_report)
+      print(paste("See problem report in file", shQuote(fname_report)))
 
-    if (force_delete_output ||
-     (delete_output && !any(res[, "has_problems"]) &&
-     (!make_new_ref || (make_new_ref && all(res[, "made_new_refs"]))))) {
-      res[, "deleted_output"] <- sapply(dir_tests[which_tests_torun],
-        function(test) delete_test_output(test))
+      temp <- rep(names(problems), times = lengths(problems))
+      temp <- paste0(temp, ifelse(nchar(temp) > 0, ": ", ""))
+      temp <- paste0(temp, unlist(problems))
+      writeLines(temp, con = file.path(dir_test, fname_report))
+  }
 
-    } else {
-      res[, "deleted_output"] <- FALSE
-    }
+  # Force delete if not already deleted (e.g., when delete all)
+  its_delete <- if (nruns > 0) which(!res[, "deleted_output"]) else seq_along(dir_tests)
 
+  if (force_delete_output && length(its_delete) > 0) for (k in its_delete) {
+
+    ftemp <- file.path(dir_tests[k], "1_Data_SWInput",
+      "Test_referenceinputfiles_which_will_be_deleted")
+
+    delete_filepaths <- if (dir.exists(ftemp)) {
+        temp <- basename(list.files(ftemp))
+        temp <- unlist(lapply(temp, function(x) list.files(dir_tests[k], pattern = x,
+          full.names = TRUE, recursive = TRUE)))
+
+        temp[!grepl(basename(ftemp), temp)]
+      } else NULL
+
+    res[k, "deleted_output"] <- delete_test_output(dir_tests[k], delete_filepaths)
   }
 
   res
@@ -130,23 +186,14 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL, dir_swsf = N
 #'
 #' @param dir_test A character string. Path to test project folder.
 #' @param dir_ref A character string. Path to folder with reference database.
-#' @param dir_swsf A character string. Path to folder with SWSF code.
-#' @param SWSF_version A character string. The version ID of the simulation framework as
+#' @param SFSW2_version A character string. The version ID of the simulation framework as
 #'  reported by the file \code{DESCRIPTION}.
 #'
 #' @return A logical value. \code{TRUE} if successful.
-make_test_output_reference <- function(dir_test, dir_ref = NULL, dir_swsf = NULL,
-  SWSF_version = NULL) {
+make_test_output_reference <- function(dir_test, dir_ref = NULL, SFSW2_version = NULL) {
 
-  if (is.null(SWSF_version)) {
-    temp <- readLines(file.path(dir_swsf, "DESCRIPTION"))
-    v <- grep("Version: ", temp, value = TRUE)
-    if (length(v) > 0) {
-      v <- strsplit(v[1], "Version: ", fixed = TRUE)[[1]][2]
-    } else {
-      print("'SWSF_version' cannot be detected.")
-      return(FALSE)
-    }
+  if (is.null(SFSW2_version)) {
+    SFSW2_version <- packageVersion("rSFSW2")
   }
 
 	if (is.null(dir_ref))
@@ -156,7 +203,7 @@ make_test_output_reference <- function(dir_test, dir_ref = NULL, dir_swsf = NULL
 
   fdb <- file.path(dir_test, "4_Data_SWOutputAggregated", "dbTables.sqlite3")
   if (file.exists(fdb)) {
-    fdb_ref <- paste0("dbTables_", basename(dir_test), "_v", v, ".sqlite3")
+    fdb_ref <- paste0("dbTables_", basename(dir_test), "_v", SFSW2_version, ".sqlite3")
     res <- file.rename(fdb, file.path(dir_ref, fdb_ref))
 
   } else {
@@ -170,15 +217,20 @@ make_test_output_reference <- function(dir_test, dir_ref = NULL, dir_swsf = NULL
 
 
 #' Delete output of a test project
-delete_test_output <- function(dir_test) {
+delete_test_output <- function(dir_test, delete_filepaths = NULL) {
   files_to_delete <- c(
+    delete_filepaths,
     list.files(dir_test, pattern = "last.dump", recursive = TRUE, full.names = TRUE),
     list.files(dir_test, pattern = ".log", recursive = TRUE, full.names = TRUE),
     list.files(dir_test, pattern = ".Rapp.history", recursive = TRUE, full.names = TRUE),
+    list.files(dir_test, pattern = ".Rhistory", recursive = TRUE, full.names = TRUE),
+    list.files(dir_test, pattern = "_olog_cluster.txt", recursive = TRUE,
+      full.names = TRUE),
     list.files(dir_test, pattern = "ClimDB_failedLocations_", recursive = TRUE,
       full.names = TRUE),
+    file.path(dir_test, "SFSW2_project_descriptions.rds"),
     file.path(dir_test, "1_Data_SWInput", "dbWeatherData_test.sqlite3"),
-    file.path(dir_test, "1_Data_SWInput", "SWRuns_InputAll_PreProcessed.RData"))
+    file.path(dir_test, "1_Data_SWInput", "SWRuns_InputAll_PreProcessed.rds"))
 
   dirs_to_delete <- c(
     file.path(dir_test, "3_Runs"),

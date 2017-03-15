@@ -1,6 +1,6 @@
 # Tools to support the development of [rSFSW2](https://github.com/Burke-Lauenroth-Lab/rSFSW2)
 
-## Note: repository renamed from rSWSFtools to rSFSW2_tools on Feb 23, 2017
+## Note: repository renamed from rSFSW2_tools to rSFSW2_tools on Feb 23, 2017
 
 All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
 
@@ -11,12 +11,11 @@ git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools.gi
 
 
 ## Test Projects
-Complete SWSF projects configured to test different functionality. Code is available to
+Complete rSFSW2 projects configured to test different functionality. Code is available to
 execute these test projects and compare against reference databases.
 
 1. Required setup
-    - Folder structure of git clones with adequate branches checked out on both
-        - ./rSFSW2
+    - Folder structure of git clones with adequate branches checked out for
         - ./rSFSW2_tools
     - If needed adjust `dir.external`, i.e., path to external datasets in p1 of test projects
 
@@ -60,10 +59,6 @@ execute these test projects and compare against reference databases.
                     ...
                 Which of the 6 tests should be run ('all'; a single number; several numbers separated by commas; zero or a negative number to delete any temporary objects):
 
-        - If the folder 'SoilWat_R_Wrapper' cannot be located
-
-                Enter path to folder of 'SoilWat_R_Wrapper':
-
 
 3. Check the outcomes
     - If the output does not compare favorably with the reference database, then a
@@ -74,4 +69,5 @@ execute these test projects and compare against reference databases.
 
 
 ## Feedback
-Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/issues) and offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/pulls)
+Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/issues) and
+offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/pulls)
