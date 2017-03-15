@@ -172,7 +172,8 @@ opt_input <- list(
   #   position of 'dw_source_priority' if available, if not then second etc.
   # Do not change/remove/add entries; only re-order to set different priorities
   dw_source_priority = c("DayMet_NorthAmerica", "LookupWeatherFolder",
-    "Maurer2002_NorthAmerica", "NRCan_10km_Canada", "NCEPCFSR_Global"),
+    "Maurer2002_NorthAmerica", "Livneh2013_NorthAmerica", "NRCan_10km_Canada",
+    "NCEPCFSR_Global"),
 
   # Creation of dbWeather
   # Compression type of dbWeather; one value of eval(formals(memCompress)[[2]])
@@ -287,9 +288,9 @@ sim_time <- list(
   # current simulation years = simstartyr:endyr
   # spinup_N = startyr - simstartyr
   # years used for results = startyr:endyr
-  simstartyr = 1915,
-  startyr = startyr <- 1916,
-  endyr = endyr <- 2010,
+  simstartyr = 1919,
+  startyr = startyr <- 1920,
+  endyr = endyr <- 1923,
 
   #Future time period(s):
   # Each list element of 'future_yrs' will be applied to every climate.conditions
