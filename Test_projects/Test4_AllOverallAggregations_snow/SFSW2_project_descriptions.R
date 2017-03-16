@@ -130,6 +130,7 @@ opt_input <- list(
       "GriddedDailyWeatherFromDayMet_NorthAmerica", 0,  # 1-km resolution
       "GriddedDailyWeatherFromNRCan_10km_Canada", 0,  # must be used with dbW
       "GriddedDailyWeatherFromNCEPCFSR_Global", 0, # must be used with dbW
+      "GriddedDailyWeatherFromLivneh2013_NorthAmerica", 0, # 1/16 degree resolution
 
       # Monthly PPT, Tmin, Tmax conditions: if using NEX or GDO-DCP-UC-LLNL,
       #   climate condition names must be of the form SCENARIO.GCM with SCENARIO being
@@ -171,7 +172,8 @@ opt_input <- list(
   #   position of 'dw_source_priority' if available, if not then second etc.
   # Do not change/remove/add entries; only re-order to set different priorities
   dw_source_priority = c("DayMet_NorthAmerica", "LookupWeatherFolder",
-    "Maurer2002_NorthAmerica", "NRCan_10km_Canada", "NCEPCFSR_Global"),
+    "Maurer2002_NorthAmerica", "Livneh2013_NorthAmerica", "NRCan_10km_Canada",
+    "NCEPCFSR_Global"),
 
   # Creation of dbWeather
   # Compression type of dbWeather; one value of eval(formals(memCompress)[[2]])
@@ -308,6 +310,20 @@ sim_time <- list(
   )
 )
 
+sim_time <- c(
+  sim_time,
+
+  # Named list of current time windows to aggregate over
+  # Note: add multiple current time windows by adding named elements 'currentX' with
+  #   X a whole positive number
+  # Note: future time windows are defined by elements of the list 'future_yrs' and added
+  #   to 'agg_years' by the code via function 'setup_simulation_time'
+  agg_years = c(
+    current1 = list(sim_time[["startyr"]]:sim_time[["endyr"]])
+#   current2 = list((sim_time[["endyr"]] - 10):(sim_time[["endyr"]] + 10))
+  )
+)
+
 
 #------ Requested climate conditions
 req_scens <- list(
@@ -414,8 +430,22 @@ req_scens <- list(
 
 
 #------ Requested output
-# Turn aggregation for variable groups on (1) or off (0), don't delete any names
 req_out <- list(
+  # Functions which aggregate output across years
+  #  don't delete names, only set \code{TRUE}/\code{FALSE}
+  agg_funs = list(
+    mean = TRUE,
+    SD  = TRUE,
+    quantile = FALSE,
+    median = FALSE,
+    mad = FALSE,
+    yearly = FALSE
+  ),
+  agg_fun_options = list(
+    quantile = list(probs = c(0, 0.025, 0.5, 0.975, 1))
+  ),
+
+  # Turn aggregation for variable groups on (1) or off (0), don't delete any names
   # Overall aggregated output table
   overall_out = c(
   #---Aggregation: SOILWAT2 inputs
@@ -542,13 +572,17 @@ opt_agg <- list(
     fourth_cm = NULL
   ),
 
-  # The ccounting of timing variables is shifted by 6 months (e.g., July becomes 1st
+  # The counting of timing variables is shifted by 6 months (e.g., July becomes 1st
   #   month, etc.) if TRUE and latitude < 0 (i.e., southern hemisphere)
   adjust_NorthSouth = TRUE,
 
   # Critical soil water potential(s) [MPa] to calculate 'dry' and 'wet' soils
   #   (cf. wilting point) and available soil water
   SWPcrit_MPa = c(-1.5, -3.0, -3.5, -3.9),
+
+  # Number of days a certain conditions must be continuously met before such a period
+  # is identified as of that conditions, e.g., 'dry' and 'wet' soils
+  define_period_min_cont_days = 10,
 
   # Critical temperatures [Celsius degrees]
   Tmin_crit_C = c(-15, -9, 0),
@@ -557,6 +591,9 @@ opt_agg <- list(
 
   # Base temperature (degree C) above which degree-days are accumulated
   Tbase_DD_C = 0,
+
+  # Calculation of the Standardized Precipitation-Evapotranspiration Index (SPEI)
+  SPEI_tscales_months = c(1, 12, 24, 48), # time scales for SPEI::spei in units of months
 
   # Daily weather frequency distributions
   # Bins of x mm precipitation event sizes
