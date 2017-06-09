@@ -162,9 +162,8 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
 
   if (force_delete_output && length(its_delete) > 0) for (k in its_delete) {
 
-    ftemp <- file.path(dir_tests[k], "1_Data_SWInput",
-      "Test_referenceinputfiles_which_will_be_deleted")
-
+    # Delete designated files and folders: include files which the test project will re-create
+    ftemp <- file.path(dir_tests[k], "1_Data_SWInput", "Test_referenceinputfiles_which_will_be_deleted")
     delete_filepaths <- if (dir.exists(ftemp)) {
         temp <- basename(list.files(ftemp))
         temp <- unlist(lapply(temp, function(x) list.files(dir_tests[k], pattern = x,
@@ -174,10 +173,30 @@ run_test_projects <- function(dir_test, dir_tests, dir_prev = NULL,
       } else NULL
 
     res[k, "deleted_output"] <- delete_test_output(dir_tests[k], delete_filepaths)
+
+    # Replace files with their initial state
+    ftemp <- file.path(dir_tests[k], "1_Data_SWInput", "Test_referenceinputfiles_which_will_be_replaced")
+    if (dir.exists(ftemp)) {
+      init_files <- list.files(ftemp)
+
+      for (f in init_files) {
+        temp <- basename(f)
+        temp <- unlist(lapply(temp, function(x) list.files(dir_tests[k], pattern = x,
+          full.names = TRUE, recursive = TRUE)))
+        files_to_replace <- temp[!grepl(basename(ftemp), temp)]
+
+        sapply(files_to_replace, function(x)
+          try(file.copy(from = file.path(ftemp, f), to = x, overwrite = TRUE,
+            copy.mode = TRUE, copy.date = TRUE), silent = TRUE))
+      }
+
+    }
+
   }
 
   res
 }
+
 
 
 #' Copy output database of a test project to reference folder
