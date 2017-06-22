@@ -92,11 +92,9 @@ tests <- file.path(dir.test, grep("[Test][[:digit:]+][_]", basename(temp), value
 temp <- if (interactive()) {
     writeLines(paste0("Available tests:\n",
       paste0("    ", seq_along(tests), ") ", basename(tests), collapse = "\n")))
-    readline(paste("Which of the",
-                    length(tests),
-                    "tests should be run",
-                    "('all'; a single number; several numbers separated by commas;",
-                    "zero or a negative number to delete any temporary objects): "))
+    readline(paste0("Which of the ", length(tests), " tests should be run: \n",
+                    "('all'; a single number; several numbers separated by commas;\n",
+                    "zero or a negative number to delete any temporary objects)"))
   } else which_tests_torun
 
 which_tests_torun <- if (!is.na(temp)) {

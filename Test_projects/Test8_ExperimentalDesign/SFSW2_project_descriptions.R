@@ -126,28 +126,52 @@ opt_input <- list(
   # Request data from datasets ('external' to a rSFSW2-project)
   req_data = c(
       # Daily weather data for current conditions
-      "GriddedDailyWeatherFromMaurer2002_NorthAmerica", 0,  # 1/8-degree resolution
-      "GriddedDailyWeatherFromDayMet_NorthAmerica", 0,  # 1-km resolution
-      "GriddedDailyWeatherFromNRCan_10km_Canada", 0,  # must be used with dbW
-      "GriddedDailyWeatherFromNCEPCFSR_Global", 0, # must be used with dbW
+      #   - Maurer et al. 2002: 1/8-degree res.; data expected at file.path(
+      #     project_paths[["dir_ex_weather"]], "Maurer+_2002updated", "DAILY_FORCINGS")
+      "GriddedDailyWeatherFromMaurer2002_NorthAmerica", 0,
+      #   - Thornton et al. 1997: 1-km res.; data expected at file.path(
+      #     project_paths[["dir_ex_weather"]], "DayMet_NorthAmerica",
+      #     "DownloadedSingleCells_FromDayMetv3_NorthAmerica")
+      "GriddedDailyWeatherFromDayMet_NorthAmerica", 0,
+      #   - McKenney et al. 2011: 10-km res.; use with dbW; data expected at file.path(
+      #     project_paths[["dir_ex_weather"]], "NRCan_10km_Canada", "DAILY_GRIDS")
+      "GriddedDailyWeatherFromNRCan_10km_Canada", 0,
+      #   - Saha et al. 2010: 0.3125-deg res.; use with dbW; data expected at file.path(
+      #     project_paths[["dir_ex_weather"]], "NCEPCFSR_Global", "CFSR_weather_prog08032012")
+      "GriddedDailyWeatherFromNCEPCFSR_Global", 0,
+      #   - Livneh et al. 2013: 1/16 degree res.; data expected at file.path(
+      #     project_paths[["dir_ex_weather"]], "Livneh_NA_2013", "MONTHLY_GRIDS")
+      "GriddedDailyWeatherFromLivneh2013_NorthAmerica", 0,
 
       # Monthly PPT, Tmin, Tmax conditions: if using NEX or GDO-DCP-UC-LLNL,
       #   climate condition names must be of the form SCENARIO.GCM with SCENARIO being
       #   used for ensembles; if using climatewizard, climate condition names must be
       #   equal to what is in the respective directories
+      #   - data expected at file.path(project_paths[["dir_ex_fut"]], "ClimateScenarios")
       "ExtractClimateChangeScenarios", 0,
 
       # Mean monthly wind, relative humidity, and 100% - sunshine
+      #   - NCDC 2005: data expected at file.path(project_paths[["dir_ex_weather"]],
+      #     "ClimateAtlasUS")
       "ExtractSkyDataFromNOAAClimateAtlas_USA", 0,
+      #   - Saha et al. 2010: project_paths[["dir_ex_weather"]], "NCEPCFSR_Global",
+      #     "CFSR_weather_prog08032012")
       "ExtractSkyDataFromNCEPCFSR_Global", 0,
 
       # Topography
-      "ExtractElevation_NED_USA", 0,  #1-arcsec res: National Elevation Dataset
-        # (ned.usgs.gov), currently downloaded only for western US
-      "ExtractElevation_HWSD_Global", 0, #30-arcsec res: Harmonized World Soil Database
+      #   - NED, National Elevation Dataset (ned.usgs.gov): 1-arcsec res; data expected
+      #     at project_paths[["dir_ex_dem"]], "NED_USA", "NED_1arcsec")
+      "ExtractElevation_NED_USA", 0,
+      #   - Harmonized World Soil Database: 30-arcsec res; data expected
+      #     at project_paths[["dir_ex_dem"]], "HWSD")
+      "ExtractElevation_HWSD_Global", 0,
 
       # Soil texture
+      #   - Harmonized World Soil Database: 1-km re-gridded; data expected
+      #     at project_paths[["dir_ex_soil"]], "CONUSSoil", "output", "albers")
       "ExtractSoilDataFromCONUSSOILFromSTATSGO_USA", 0,
+      #   - ISRIC-WISE v1.2: 1-km re-gridded; data expected
+      #     at project_paths[["dir_ex_soil"]], "WISE", "wise5by5min_v1b", "Grid", "smw5by5min")
       "ExtractSoilDataFromISRICWISEv12_Global", 0
   ),
 
@@ -171,7 +195,8 @@ opt_input <- list(
   #   position of 'dw_source_priority' if available, if not then second etc.
   # Do not change/remove/add entries; only re-order to set different priorities
   dw_source_priority = c("DayMet_NorthAmerica", "LookupWeatherFolder",
-    "Maurer2002_NorthAmerica", "NRCan_10km_Canada", "NCEPCFSR_Global"),
+    "Maurer2002_NorthAmerica", "Livneh2013_NorthAmerica", "NRCan_10km_Canada",
+    "NCEPCFSR_Global"),
 
   # Creation of dbWeather
   # Compression type of dbWeather; one value of eval(formals(memCompress)[[2]])
@@ -316,6 +341,8 @@ req_scens <- list(
   ambient = "Current",
 
   # Names of climate scenarios
+  #   - If a simulation project does not include future climate conditions, then set
+  #     models = NULL
   #   If climate datafiles used, then in the order of data in the those datafiles
   # This is a list of all GCMs for CMIP5 provided by GDO-DCP-UC-LLNL: 37 RCP4.5, 35 RCP8.5
   #   Excluded: 'HadCM3' and 'MIROC4h' because data only available until 2035
