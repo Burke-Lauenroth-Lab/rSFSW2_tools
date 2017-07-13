@@ -19,7 +19,7 @@ opt_behave <- list(
   # Resumes/continues with unfinished part of simulation after abort if TRUE, i.e.,
   #  - It doesn't delete an existing weather database, if a new one is requested
   #  - It doesn't re-extract external information (soils, elevation, climate normals,
-  #     NCEPCFSR) if already extracted
+  #     climate scenarios) if already extracted
   #  - It doesn't lookup values from tables if already available in input datafiles, i.e.,
   #     'LookupEvapCoeffFromTable', 'LookupTranspRegionsFromTable', and
   #     'LookupSnowDensityFromTable'
@@ -42,8 +42,8 @@ opt_parallel <- list(
   parallel_runs = !interactive(),
   # Number of cores/workers/slaves if job is run in parallel
   num_cores = 4,
-  # Parallel_backend: "cluster" (via package 'parallel') or "mpi" (via 'Rmpi')
-  parallel_backend = "cluster",
+  # Parallel_backend: "socket" = "cluster" (via package 'parallel') or "mpi" (via 'Rmpi')
+  parallel_backend = "socket",
 
   # Computation time requests: time limits are only enforced if parallel_backend == "mpi"
   opt_job_time = list(
@@ -60,15 +60,14 @@ opt_verbosity <- list(
   # Prints status of progress to standard output
   verbose = TRUE,
   # Prints details of progress to standard output
-  print.debug = interactive(),
+  print.debug = TRUE, #interactive(),
   # Calculates and prints estimated time of job completion at end of each call of
   #   'do_OneSite' (a somewhat expensive operation)
   print.eta = interactive(),
 
   # Sets global option 'warn' for the duration of a simulation project
   #   Possible values: -1, 0, 1, 2; for details: ?options -> Value: warn
-#  debug.warn.level = 2 * interactive(),
-  debug.warn.level = 1, #TODO: remove and use 2 * interactive()
+  debug.warn.level = max(1, 2 * interactive()),
   # Should R objects be dumped to disk on error (including for each call to 'do_OneSite')
   debug.dump.objects = interactive()
 )

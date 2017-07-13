@@ -7,8 +7,9 @@ dir.old <- getwd()
 if (!interactive()) {
   script_args <- commandArgs(trailingOnly = TRUE)
 
-  if (any("--help" == script_args)) {
+  if (any("--help" == script_args) || "-h" == script_args) {
     print("Options:")
+    print("    '--help' or '-h': print these explanations")
     print("    '--path' or '-p': -p=path to folder of test projects 'Test_projects'")
     print("    '--new_ref' or '-r': add output DB as new reference if successful")
     print("    '--force-delete' or '-D': force delete test output; implies '-d'")
