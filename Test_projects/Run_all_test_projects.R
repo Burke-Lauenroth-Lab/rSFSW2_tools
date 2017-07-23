@@ -94,12 +94,14 @@ temp <- if (interactive()) {
     writeLines(paste0("Available tests:\n",
       paste0("    ", seq_along(tests), ") ", basename(tests), collapse = "\n")))
     readline(paste0("Which of the ", length(tests), " tests should be run: \n",
-                    "('all'; a single number; several numbers separated by commas;\n",
-                    "zero or a negative number to delete any temporary objects)"))
+      "('c' for 'cancel'; 'all'; a single number; several numbers separated by commas;\n",
+      "zero or a negative number to delete any temporary objects)"))
   } else which_tests_torun
 
 which_tests_torun <- if (!is.na(temp)) {
-    if ("all" == temp) {
+    if (identical(tolower(temp), "c") || identical(tolower(temp), "cancel") ) {
+      NA
+    } else if ("all" == temp) {
       seq_along(tests)
     } else {
       temp <- unique(as.integer(strsplit(gsub("[[:space:]]", "", temp), ",")[[1]]))
@@ -114,26 +116,27 @@ which_tests_torun <- if (!is.na(temp)) {
   }
 
 
+if (!is.na(which_tests_torun)) {
+  #---Load functions
+  library("rSFSW2")
 
-#---Load functions
-library("rSFSW2")
+  cat("\n")
+  source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
 
-cat("\n")
-source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
+  #debug(run_test_projects)
 
-#debug(run_test_projects)
+  #---Run projects
+  if (any(which_tests_torun > 0)) {
+    out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
+      which_tests_torun, delete_output, force_delete_output, make_new_ref)
+    print(out)
 
-#---Run projects
-if (any(which_tests_torun > 0)) {
-  out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
-    which_tests_torun, delete_output, force_delete_output, make_new_ref)
-  print(out)
-
-} else if (which_tests_torun < 1) {
-  print(paste0(Sys.time(), ": delete temporary disk files of rSFSW2 test projects"))
-  out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
-    which_tests_torun = NULL, delete_output = FALSE, force_delete_output = TRUE,
-    make_new_ref = FALSE)
+  } else if (which_tests_torun < 1) {
+    print(paste0(Sys.time(), ": delete temporary disk files of rSFSW2 test projects"))
+    out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
+      which_tests_torun = NULL, delete_output = FALSE, force_delete_output = TRUE,
+      make_new_ref = FALSE)
+  }
 }
 
 setwd(dir.old)
