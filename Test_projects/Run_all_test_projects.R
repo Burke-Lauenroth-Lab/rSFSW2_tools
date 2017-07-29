@@ -116,7 +116,7 @@ which_tests_torun <- if (!is.na(temp)) {
   }
 
 
-if (!is.na(which_tests_torun)) {
+if (any(!is.na(which_tests_torun))) {
   #---Load functions
   library("rSFSW2")
 
