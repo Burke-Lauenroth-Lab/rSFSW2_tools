@@ -1,6 +1,10 @@
 #!/usr/bin/env Rscript
-print(paste0(Sys.time(), ": running 'rSFSW2_tools' test projects"))
-dir.old <- getwd()
+dir_prev <- getwd()
+
+writeLines(c("", "",
+  "##############################################################################",
+  paste("#------ rSFSW2_tools-TEST-PROJECTS started at", Sys.time()),
+  "##############################################################################", ""))
 
 
 #---Command line input for non-interactive use
@@ -8,20 +12,20 @@ if (!interactive()) {
   script_args <- commandArgs(trailingOnly = TRUE)
 
   if (any("--help" == script_args) || "-h" == script_args) {
-    print("Options:")
-    print("    '--help' or '-h': print these explanations")
-    print("    '--path' or '-p': -p=path to folder of test projects 'Test_projects'")
-    print("    '--new_ref' or '-r': add output DB as new reference if successful")
-    print("    '--force-delete' or '-D': force delete test output; implies '-d'")
-    print("    '--delete' or '-d': delete test output if successful")
-    print("    '--tests' or '-t': -t=all runs all available test projects;")
-    print("                       -t=1,2 runs test projects 1 and 2 (separated by comma)")
+    cat("Options:\n")
+    cat("    '--help' or '-h': cat these explanations\n")
+    cat("    '--path' or '-p': -p=path to folder of test projects 'Test_projects'\n")
+    cat("    '--new_ref' or '-r': add output DB as new reference if successful\n")
+    cat("    '--force-delete' or '-D': force delete test output; implies '-d'\n")
+    cat("    '--delete' or '-d': delete test output if successful\n")
+    cat("    '--tests' or '-t': -t=all runs all available test projects;\n")
+    cat("                       -t=1,2 runs test projects 1 and 2 (separated by comma)\n")
 
     stop("End of help")
   }
 
   temp <- grepl("--path", script_args) | grepl("-p", script_args)
-  path <- if (any(temp)) strsplit(script_args[temp][1], "=")[[1]][2] else dir.old
+  path <- if (any(temp)) strsplit(script_args[temp][1], "=")[[1]][2] else dir_prev
 
   make_new_ref <- any("--new_ref" == script_args) || any("-r" == script_args)
 
@@ -43,8 +47,8 @@ if (!interactive()) {
 
 #---Interactive user input
 # Current working directory must be a subfolder of 'rSFSW2_tools' or itself
-dir.test <- if (grepl("rSFSW2_tools", dir.old)) {
-    temp <- strsplit(dir.old, .Platform$file.sep, fixed = TRUE)[[1]]
+dir_test <- if (grepl("rSFSW2_tools", dir_prev)) {
+    temp <- strsplit(dir_prev, .Platform$file.sep, fixed = TRUE)[[1]]
     temp <- do.call("file.path", as.list(temp[seq_len(which(temp == "rSFSW2_tools"))]))
     file.path(temp, "Test_projects")
 
@@ -58,8 +62,8 @@ dir.test <- if (grepl("rSFSW2_tools", dir.old)) {
     }
     temp
   }
-dir.test <- normalizePath(dir.test)
-setwd(dir.test)
+dir_test <- normalizePath(dir_test)
+setwd(dir_test)
 
 # Ask if output should be saved as future reference DB
 make_new_ref <- if (interactive()) {
@@ -88,14 +92,14 @@ delete_output <- if (!force_delete_output) {
   } else TRUE
 
 # Ask which of the test projects should be run
-temp <- list.dirs(dir.test, full.names = FALSE, recursive = FALSE)
-tests <- file.path(dir.test, grep("[Test][[:digit:]+][_]", basename(temp), value = TRUE))
+temp <- list.dirs(dir_test, full.names = FALSE, recursive = FALSE)
+tests <- file.path(dir_test, grep("[Test][[:digit:]+][_]", basename(temp), value = TRUE))
 temp <- if (interactive()) {
     writeLines(paste0("Available tests:\n",
       paste0("    ", seq_along(tests), ") ", basename(tests), collapse = "\n")))
     readline(paste0("Which of the ", length(tests), " tests should be run: \n",
       "('c' for 'cancel'; 'all'; a single number; several numbers separated by commas;\n",
-      "zero or a negative number to delete any temporary objects)"))
+      "zero or a negative number to delete any temporary objects) "))
   } else which_tests_torun
 
 which_tests_torun <- if (!is.na(temp)) {
@@ -120,26 +124,36 @@ if (any(!is.na(which_tests_torun))) {
   #---Load functions
   library("rSFSW2")
 
-  cat("\n")
-  source(file.path(dir.test, "Functions_for_test_projects.R"), keep.source = FALSE)
-
-  #debug(run_test_projects)
-
   #---Run projects
   if (any(which_tests_torun > 0)) {
-    out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
-      which_tests_torun, delete_output, force_delete_output, make_new_ref)
-    print(out)
+    out <- rSFSW2::run_test_projects(dir_prj_tests = dir_test, dir_tests = tests,
+      dir_prev = dir_prev, which_tests_torun = which_tests_torun,
+      delete_output = delete_output, force_delete_output = force_delete_output,
+      make_new_ref = make_new_ref, write_report_to_disk = TRUE)
+
+    cat("\nSummary of test project runs:\n")
+    print(out[["res"]])
+    cat("\n")
 
   } else if (which_tests_torun < 1) {
-    print(paste0(Sys.time(), ": delete temporary disk files of rSFSW2 test projects"))
-    out <- run_test_projects(dir_test = dir.test, dir_tests = tests, dir_prev = dir.old,
-      which_tests_torun = NULL, delete_output = FALSE, force_delete_output = TRUE,
-      make_new_ref = FALSE)
+    cat("\n")
+    cat(paste0(Sys.time(), ": delete temporary disk files of rSFSW2 test projects.\n"))
+    out <- rSFSW2::run_test_projects(dir_prj_tests = dir_test, dir_tests = tests,
+      dir_prev = dir_prev, which_tests_torun = NULL, delete_output = FALSE,
+      force_delete_output = TRUE, make_new_ref = FALSE, write_report_to_disk = FALSE)
   }
 }
 
-setwd(dir.old)
-print(paste0(Sys.time(), ": end of rSFSW2 test projects"))
+setwd(dir_prev)
 
-warnings()
+temp <- warnings()
+if (!is.null(temp)) {
+  cat("Warnings generated during test projects:\n")
+  print(temp)
+}
+
+writeLines(c("", "",
+  "##############################################################################",
+  paste("#------ rSFSW2_tools-TEST-PROJECTS ended at", Sys.time()),
+  "##############################################################################", ""))
+

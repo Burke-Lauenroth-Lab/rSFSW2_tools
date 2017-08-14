@@ -68,20 +68,11 @@ actions <- list(
 ##############################################################################
 #------ 1) CREATE A NEW SIMULATION PROJECT (DO ONCE) -------------------------
 
-dir_prj <- "SFSW2_default_project"
+# If code is run non-interactively or if this is a test project:
+# then current working directory must be folder of test projects,
+# e.g., rSFSW2_tools/Test_projects/Test4_AllOverallAggregations_snow
+dir_prj <- getwd()
 
-if (TRUE) {
-  # If this is a test project:
-  #   * if interactive: current working directory must be rSFSW2_tools/
-  #   * if !interactive: current working directory must be folder of test projects,
-  #       * e.g., rSFSW2_tools/Test_projects/Test4_AllOverallAggregations
-  if (interactive()) {
-    dir_prj <- normalizePath(file.path(".", "Test_projects", "Test4_AllOverallAggregations_snow"))
-    setwd(dir_prj)
-  }
-
-  dir_prj <- getwd()
-}
 
 writeLines(c("", "",
   "##############################################################################",
@@ -142,8 +133,8 @@ if (actions[["prep_inputs"]]) {
   SFSW2_prj_inputs <- temp[["SFSW2_prj_inputs"]]
 
   warning("'SFSW2_project_code.R': Modify/reset input tracker status ",
-    "'SFSW2_prj_meta[['input_status']]', if needed, manually or by calling function ",
-    "'update_intracker' and re-run project.", call. = FALSE, immediate. = TRUE)
+    "'SFSW2_prj_meta[['input_status']]', if needed (see help `?update_intracker`) ",
+    "and re-run project.", call. = FALSE, immediate. = TRUE)
 }
 
 

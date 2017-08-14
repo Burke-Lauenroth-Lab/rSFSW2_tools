@@ -16,7 +16,7 @@
 #------ Paths to simulation framework project folders
 project_paths <- list(
   dir_prj = dir_prj <- {# path to simulation project
-    temp <- file.path(".", "Test_projects", "Test1_downscaling_overhaul")
+    temp <- getwd()
 
     if (dir.exists(temp)) {
       if (interactive()) setwd(temp)
@@ -348,9 +348,9 @@ req_scens <- list(
   # Names of climate scenarios
   #   - If a simulation project does not include future climate conditions, then set
   #     models = NULL
-  #   If climate datafiles used, then in the order of data in the those datafiles
-  # This is a list of all GCMs for CMIP5 provided by GDO-DCP-UC-LLNL: 37 RCP4.5, 35 RCP8.5
-  #   Excluded: 'HadCM3' and 'MIROC4h' because data only available until 2035
+  #   - If climate datafiles used, then in the order of data in the those datafiles
+  #   - This is a list of all GCMs for CMIP5 provided by GDO-DCP-UC-LLNL: 37 RCP4.5, 35 RCP8.5
+  #     Excluded: 'HadCM3' and 'MIROC4h' because data only available until 2035
   models = c(
     "RCP45.CanESM2", "RCP45.CESM1-CAM5", "RCP45.HadGEM2-CC",
     "RCP85.CanESM2", "RCP85.CESM1-CAM5", "RCP85.HadGEM2-CC"),
@@ -360,13 +360,15 @@ req_scens <- list(
     # Priority of extraction: dataset1, dataset2, ... if multiple sources provide data
     #   for a location
     # Dataset = 'project_source' with
-    #   - project = one string out of c("CMIP3", "CMIP5", "GeoMIP")
+    #   - project = one string out of c("CMIP3", "CMIP5")
     #   - source = one string out of:
     #     - "ClimateWizardEnsembles_Global": mean monthly values at 50-km resolution for 2070-2099
     #     - "ClimateWizardEnsembles_USA": mean monthly change at 12-km resolution between 2070-2099 and 1971-2000
     #     - "BCSD_GDODCPUCLLNL_USA": monthly time series at 1/8-degree resolution
     #     - "BCSD_GDODCPUCLLNL_Global": monthly time series at 1/2-degree resolution
     #     - "BCSD_NEX_USA": monthly time series at 30-arcsec resolution; requires live internet access
+    #     - "BCSD_SageSeer_USA": monthly time-series at 1-km resolution for the western US prepared by Katie Renwick
+    #     - "ESGF_Global": monthly time-series at varying resolution
       dataset1 = "CMIP5_BCSD_GDODCPUCLLNL_USA"
   ),
 
