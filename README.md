@@ -1,13 +1,4 @@
-# Tools to support the development of [rSFSW2](https://github.com/Burke-Lauenroth-Lab/rSFSW2)
-
-## Note: repository renamed from rSFSW2_tools to rSFSW2_tools on Feb 23, 2017
-
-All existing information should [automatically be redirected](https://help.github.com/articles/renaming-a-repository/) to the new name.
-
-Contributors are encouraged, however, to update local clones to [point to the new URL](https://help.github.com/articles/changing-a-remote-s-url/), i.e.,
-```
-git remote set-url origin https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools.git
-```
+# Tools to support the development of [rSFSW2](https://github.com/DrylandEcology/rSFSW2)
 
 
 ## Test Projects
@@ -69,5 +60,5 @@ execute these test projects and compare against reference databases.
 
 
 ## Feedback
-Please, report [issues](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/issues) and
-offer [pull-request](https://github.com/Burke-Lauenroth-Lab/rSFSW2_tools/pulls)
+Please, report [issues](https://github.com/DrylandEcology/rSFSW2_tools/issues) and
+offer [pull-request](https://github.com/DrylandEcology/rSFSW2_tools/pulls)
