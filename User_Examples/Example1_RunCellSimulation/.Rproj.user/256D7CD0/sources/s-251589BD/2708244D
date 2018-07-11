@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1531335727571.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2728312957",
+    "id" : "2708244D",
+    "lastKnownWriteTime" : 1531335848,
+    "last_content_update" : 1531335848,
+    "path" : "~/Documents/Git/rSFSW2_tools/User_Examples/Example1_RunCellSimulation/1_Input/datafiles/SWRuns_InputData_soils_v12.csv",
+    "project_path" : "1_Input/datafiles/SWRuns_InputData_soils_v12.csv",
+    "properties" : {
+        "cursorPosition" : "0,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "text"
+}
